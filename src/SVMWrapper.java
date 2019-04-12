@@ -32,7 +32,7 @@ public class SVMWrapper {
     public svm_model svmTrain()
     {
         param = new svm_parameter();
-        setSVMParameters(svm_parameter.C_SVC, svm_parameter.RBF, 0.5, 10);
+        setSVMParameters(svm_parameter.C_SVC, svm_parameter.RBF, 100, 10);
 
         model = svm.svm_train(prob, param);
         return model;
@@ -40,7 +40,7 @@ public class SVMWrapper {
 
     private void setSVMParameters(int type, int kernel, double gamma, double cost)
     {
-        param.probability = 1;
+        //param.probability = 1;
         param.svm_type = type;
         param.kernel_type = kernel;
         param.gamma = gamma;
@@ -98,11 +98,19 @@ public class SVMWrapper {
         return yPred;
     }
 
-    public double evaluateError(double[][] data, double[] yPred)
+    public double evaluateMSE(double[][] data, double[] yPred)
     {
         double err = 0.0;
         for(int k = 0; k < data.length; k++)
             err += (data[k][0] - yPred[k])*(data[k][0] - yPred[k]);
+        return err/data.length;
+    }
+
+    public double evaluateError(double[][] data, double[] yPred)
+    {
+        double err = 0;
+        for(int k = 0; k < data.length; k++)
+            if(data[k][0] != yPred[k]) err++;
         return err/data.length;
     }
 }
