@@ -1,23 +1,27 @@
-import libsvm.svm_model;
+import classification.DatasetResult;
+import classification.SVMClassifier;
+import dataset.Dataset;
+import dataset.DatasetTools;
 
 import java.io.FileNotFoundException;
 
 public class MainClass {
 
     public static void main(String[] args) {
-        double[][] trainData = new double[0][];
+        Dataset trainData;
         try {
-            trainData = DataPrepare.readData("./data/7bialek_0.2_1_score.txt");
+            trainData = DatasetTools.loadData("./data/7bialek_0.2_1_score.txt", 1, 1);
+            DatasetTools.normalizeMinMax(trainData);
+            SVMClassifier svm = new SVMClassifier();
+            svm.buildClassifier(trainData);
+            DatasetResult results = svm.classify(trainData);
+            //for(int k = 0; k < trainData.length; k++)
+            //    System.out.println("(Actual:" + trainData[k][0] + " Prediction:" + yPred[k] + ")");
+            double err = svm.evaluateError(trainData, results.getLabels());
+            System.out.println(err);
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        trainData = DataPrepare.normalizeMinMax(trainData, DataPrepare.getMinMax(trainData));
-
-        SVMWrapper wrapper = new SVMWrapper();
-        wrapper.defineSVMProblem(trainData);
-        svm_model svmModel = wrapper.svmTrain();
-        double[] yPred = wrapper.svmPredict(trainData, svmModel);
-        double err = wrapper.evaluateError(trainData, yPred);
-        System.out.println(err);
     }
 }
