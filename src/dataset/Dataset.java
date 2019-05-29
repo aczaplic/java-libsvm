@@ -70,6 +70,23 @@ public interface Dataset extends List<Instance> {
     public Object classValue(int index);
 
     /**
+     * Create a number of folds from the data set and return them. The supplied
+     * random generator is used to determine which instances are assigned to
+     * each of the folds.
+     *
+     * @param numFolds
+     *            the number of folds to create
+     * @param rg
+     *            the random generator
+     * @param stratified
+     *            whether to ensure that each class is equally represented
+     *            in all the folds
+     * @return an array of data sets that contains <code>numFolds</code> data
+     *         sets.
+     */
+    public Dataset[] folds(int numFolds, Random rg, boolean stratified);
+
+    /**
      * Create a deep copy of the data set. This method should also create deep
      * copies of the instances in the data set.
      *

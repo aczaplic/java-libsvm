@@ -46,7 +46,7 @@ public class SVMClassifier implements Classifier {
     @Override
     public void buildClassifier(Dataset data) {
         defineSVMProblem(data);
-        setSVMParameters(svm_parameter.C_SVC, svm_parameter.RBF, 100, 10);
+        setSVMParameters(svm_parameter.C_SVC, svm_parameter.RBF, 10, 10);
         model = svm.svm_train(prob, param);
     }
 
@@ -83,17 +83,7 @@ public class SVMClassifier implements Classifier {
         }
     }
 
-    /**
-     * Classifies data set using SVM model and returns
-     * the results of classification.
-     *
-     * @param test
-     *          data set to classify
-     *
-     * @return results of classification of the whole
-     *          data set
-     *
-     */
+    @Override
     public DatasetResult classify(Dataset test)
     {
 
@@ -119,7 +109,7 @@ public class SVMClassifier implements Classifier {
             test_x[i] = node;
         }
 
-        double v;
+        double label;
         double[] val_prob;
         if (model.param.probability == 1)
         {
@@ -127,19 +117,19 @@ public class SVMClassifier implements Classifier {
             int[] labels = new int[totalClasses];
             svm.svm_get_labels(model, labels);
             val_prob = new double[totalClasses];
-            v = svm.svm_predict_probability(model, test_x, val_prob);
-            for (int i = 0; i < totalClasses; i++)
-                System.out.print("(" + labels[i] + ":" + val_prob[i] + ")");
+            label = svm.svm_predict_probability(model, test_x, val_prob);
+            //for (int i = 0; i < totalClasses; i++)
+            //    System.out.print("(" + labels[i] + ":" + val_prob[i] + ")");
         } else {
             val_prob = new double[1];
             //double v = svm.svm_predict(model, test_x);
-            v = svm.svm_predict_values(model, test_x, val_prob);
-            System.out.print("(value :" + val_prob[0] + ")");
+            label = svm.svm_predict_values(model, test_x, val_prob);
+            //System.out.print("(value :" + val_prob[0] + ")");
         }
 
-        if (!instance.classValue().equals(v))
-            System.out.println("(Actual:" + instance.classValue() + " Prediction:" + v + ")");
-        return createInstanceResult(v, val_prob, model.param.probability);
+        //if(!instance.classValue().equals(label))
+        //    System.out.println("ID:" + instance.getID() + " (Actual:" + instance.classValue() + " Prediction:" + label + ")");
+        return createInstanceResult(label, val_prob, model.param.probability);
     }
 
     @Override
@@ -217,46 +207,5 @@ public class SVMClassifier implements Classifier {
             catch (Exception e) {}
             System.out.println();
         }
-    }
-
-    /**
-     * Evaluates mean square error of classifying data set
-     * by the SVM model.
-     *
-     * @param data
-     *            classified data set
-     * @param yPred
-     *            real values of class labels
-     *
-     */
-    public double evaluateMSE(Dataset data, double[] yPred)
-    {
-        double err = 0.0;
-        double y;
-        for(int k = 0; k < data.size(); k++) {
-            y = Double.parseDouble(data.getInstance(k).classValue().toString());
-            err += (y - yPred[k]) * (y - yPred[k]);
-        }
-        return err/data.size();
-    }
-
-    /**
-     * Evaluates classification error of data set
-     *
-     * @param data
-     *            classified data set
-     * @param yPred
-     *            real values of class labels
-     *
-     */
-    public double evaluateError(Dataset data, Object[] yPred)
-    {
-        double err = 0;
-        Object y;
-        for(int k = 0; k < data.size(); k++) {
-            y = data.getInstance(k).classValue();
-            if (!yPred[k].equals(y)) err++;
-        }
-        return err/data.size();
     }
 }

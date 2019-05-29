@@ -24,7 +24,7 @@ public class FileHandler {
                 result.add(record);
             }
         }
-        Collections.shuffle(result);
+        //Collections.shuffle(result);
         return result;
     }
 }

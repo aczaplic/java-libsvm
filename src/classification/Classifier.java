@@ -26,6 +26,19 @@ public interface Classifier extends Serializable {
     public InstanceResult classify(Instance instance);
 
     /**
+     * Classifies data set using SVM model and returns
+     * the results of classification.
+     *
+     * @param test
+     *          data set to classify
+     *
+     * @return results of classification of the whole
+     *          data set
+     *
+     */
+    public DatasetResult classify(Dataset test);
+
+    /**
      * Loads model of classifier from file.
      *
      * @param filename
