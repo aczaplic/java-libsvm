@@ -3,12 +3,12 @@ package classification;
 public class InstanceResult implements ClassificationResult {
 
     private Object label;
-    private double[] values;
+    private double value;
     private double[] probability;
 
-    private InstanceResult(Object label, double[] values, double[] probability) {
+    public InstanceResult(Object label, double[] value, double[] probability) {
         this.label = label;
-        this.values = values;
+        this.value = value[0];
         this.probability = probability;
     }
 
@@ -19,7 +19,7 @@ public class InstanceResult implements ClassificationResult {
      * @param label
      *            value of class label for instance
      * @param val_prob
-     *            array of values or probability for each class
+     *            array of value or probability for each class
      *            according to probability
      * @param probability
      *            flag of probability parameter in SVM model
@@ -39,8 +39,8 @@ public class InstanceResult implements ClassificationResult {
     }
 
     @Override
-    public double[] getValues() {
-        return values;
+    public double getValue() {
+        return value;
     }
 
     @Override

@@ -232,7 +232,7 @@ public class Fold implements Dataset {
     public double[] getFeature(int pos) {
         double[] values = new double[this.size()];
         for(int i=0; i<this.size(); i++){
-            values[i] = getInstance(i).featureValue(pos);
+            values[i] = getInstance(i).getFeatureValue(pos);
         }
         return values;
     }

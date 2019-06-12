@@ -7,12 +7,22 @@ public abstract class AbstractInstance implements Instance {
     static int nextID = 0;
 
     private final int ID;
+    private Object userData=null;
+    private Object classValue;
 
     public int getID() {
         return ID;
     }
 
-    private Object classValue;
+    public Object getUserData()
+    {
+        return(this.userData);
+    }
+
+    public void setUserData(Object data)
+    {
+        this.userData=data;
+    }
 
     /**
      * Creates a new instance with the class label set to null.
@@ -35,7 +45,7 @@ public abstract class AbstractInstance implements Instance {
     }
 
     @Override
-    public Object classValue() {
+    public Object getClassValue() {
         return classValue;
     }
 

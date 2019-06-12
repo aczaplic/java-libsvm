@@ -32,6 +32,22 @@ public class BasicInstance extends AbstractInstance implements Instance{
         this.features = values.clone();
     }
 
+    /**
+     * Creates a new instance with the provided name, values of features,
+     * and class label.
+     *
+     * @param name
+     *            user name of instance
+     * @param values
+     *            the attribute values
+     * @param classValue
+     *            the class label
+     */
+    public BasicInstance(String name, double[] values, Object classValue) {
+        this(values, classValue);
+        super.setUserData(name);
+    }
+
     /* Hide argumentless constructor */
     private BasicInstance() {
     }
@@ -42,7 +58,7 @@ public class BasicInstance extends AbstractInstance implements Instance{
     }
 
     @Override
-    public double featureValue(int pos) {
+    public double getFeatureValue(int pos) {
         return features[pos];
     }
 
@@ -59,7 +75,7 @@ public class BasicInstance extends AbstractInstance implements Instance{
     @Override
     public Instance copy() {
         BasicInstance instClone = new BasicInstance();
-        instClone.setClassValue(this.classValue());
+        instClone.setClassValue(this.getClassValue());
         instClone.features = this.features.clone();
         return instClone;
     }

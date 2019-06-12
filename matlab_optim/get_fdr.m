@@ -1,0 +1,49 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Funkcja obliczajaca FDR i q-wartosci na podstawie przynalaznosci do baz target i decoy%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [q,f]=get_fdr(decoy,sort_score,sort_arg)
+
+do_sort=0;
+sort_mode='descend';
+
+if nargin>1
+	do_sort=1;
+    if nargin>2 && (strcmp(sort_arg,'descend')==1 || strcmp(sort_arg,'ascend')==1)
+		sort_mode=sort_arg;
+    end
+end
+
+%sortowanie zgodnie ze score
+if do_sort==1
+	[s,ind]=sort(sort_score,sort_mode);
+	decoy=decoy(ind);
+end
+
+
+%liczenie q-wartosci
+f=zeros(size(decoy));
+
+d_counter=0;
+b_counter=0;
+for i=1:length(f)
+    if (decoy(i)==1)
+        d_counter=d_counter+1;
+    end
+    if (decoy(i)==2)
+        b_counter=b_counter+1;
+    end
+	f(i)=d_counter/(i-b_counter);
+end
+
+q=f;
+for i=length(q)-1:-1:1
+	q(i)=min(q(i),q(i+1));
+end
+
+
+%przywrocenie oryginalnego uporzadkowania
+if do_sort==1
+	q(ind)=q;
+end
+
+return;

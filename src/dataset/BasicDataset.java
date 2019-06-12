@@ -56,8 +56,8 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
     @Override
     public synchronized boolean add(Instance inst) {
         if (check(inst)) {
-            if (inst.classValue() != null)
-                classes.add(inst.classValue());
+            if (inst.getClassValue() != null)
+                classes.add(inst.getClassValue());
             return super.add(inst);
         }
         return false;
@@ -67,8 +67,8 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
     public synchronized boolean addAll(Collection<? extends Instance> coll) {
         if (check(coll)) {
             for (Instance inst : coll)
-                if (inst.classValue() != null)
-                    classes.add(inst.classValue());
+                if (inst.getClassValue() != null)
+                    classes.add(inst.getClassValue());
             return super.addAll(coll);
         }
         return false;
@@ -88,7 +88,7 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
     public double[] getFeature(int pos) {
         double[] values = new double[this.size()];
         for(int i=0; i<this.size(); i++){
-            values[i] = super.get(i).featureValue(pos);
+            values[i] = super.get(i).getFeatureValue(pos);
         }
         return values;
     }
@@ -102,8 +102,8 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
 
     @Override
     public int classIndex(Instance inst) {
-        if (inst.classValue() != null)
-            return this.classes().headSet(inst.classValue()).size();
+        if (inst.getClassValue() != null)
+            return this.classes().headSet(inst.getClassValue()).size();
         else
             return -1;
     }

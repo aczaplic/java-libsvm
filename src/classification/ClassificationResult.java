@@ -10,12 +10,12 @@ public interface ClassificationResult {
     public Object getLabel();
 
     /**
-     * Returns evaluated values for one instance
+     * Returns evaluated score for one instance
      * using created classifier.
      *
-     * @return array of predicted values
+     * @return predicted score
      */
-    public double[] getValues();
+    public double getValue();
 
     /**
      * Returns evaluated probability of classes for

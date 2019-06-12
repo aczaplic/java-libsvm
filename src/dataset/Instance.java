@@ -8,7 +8,7 @@ public interface Instance extends Serializable {
      *
      * @return class value of this instance, or null if the class is not set
      */
-    public Object classValue();
+    public Object getClassValue();
 
     /**
      * Sets the class value for this instance.
@@ -31,7 +31,7 @@ public interface Instance extends Serializable {
      *
      * @return feature value at the position pos for this instance
      */
-    public double featureValue(int pos);
+    public double getFeatureValue(int pos);
 
     /**
      * Returns values of all features for this instance.

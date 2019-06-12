@@ -14,7 +14,7 @@ public class MainClass {
         int numFolds = 5;
         try {
             trainData = DatasetTools.loadData("./data/7bialek_0.2_1_score.txt", 1, 1);
-            DatasetTools.normalizeMinMax(trainData); // TODO transformations on data as part of model
+            double[][] min_max = DatasetTools.normalizeMinMax(trainData); // TODO transformations on data as part of model
 
             List<Classifier> models = new ArrayList<>();
             for (int i=0; i<numFolds; i++)

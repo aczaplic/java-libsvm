@@ -39,7 +39,15 @@ public interface Classifier extends Serializable {
     public DatasetResult classify(Dataset test);
 
     /**
-     * Loads model of classifier from file.
+     * Save model of classifier to file.
+     *
+     * @param filename
+     *            the path to file
+     */
+    public void saveModel(String filename) throws IOException;
+
+    /**
+     * Load model of classifier from file.
      *
      * @param filename
      *            the path to file

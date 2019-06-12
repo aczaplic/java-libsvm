@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="combinatoricslib-2.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/combinatoricslib-2.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/libsvm.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/macify.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/mscanlib.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/mscanlib-plots.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

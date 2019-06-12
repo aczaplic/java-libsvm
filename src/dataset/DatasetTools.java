@@ -5,6 +5,12 @@ import java.util.ArrayList;
 
 public class DatasetTools {
 
+    /* data transformations */
+    public static final int NormStd = 0;
+    public static final int NormMinMax = 1;
+
+    public static final String[] transformTable = new String[]{"NormStd", "NormMinMax"};
+
     /**
      * Load data from file line after line (separated by tabulator) to Dataset
      *
@@ -78,10 +84,11 @@ public class DatasetTools {
      *              data set to be transformed
      *
      */
-    public static void normalizeMinMax(Dataset data) {
+    public static double[][] normalizeMinMax(Dataset data) {
         int recordCount = data.size();
         int featureCount = data.numFeatures();
         double[] feature;
+        double[][] min_max = new double[featureCount][2];
 
         for (int i = 0; i < featureCount; i++) {
             double min=Double.POSITIVE_INFINITY;
@@ -95,9 +102,28 @@ public class DatasetTools {
                 if (feature[j] < min)
                     min = feature[j];
             }
+            min_max[i][0] = min;
+            min_max[i][1] = max;
 
             for (int j = 0; j <recordCount; j++)
                 data.getInstance(j).setFeatureValue(i, (feature[j]-min)/(max-min));
+        }
+        return min_max;
+    }
+
+    public static void normalizeMinMax(Instance instance, double[][] min_max) {
+        for (int i = 0; i < instance.numFeatures(); i++) {
+            double newFeature = (instance.getFeatureValue(i)-min_max[i][0])/(min_max[i][1]-min_max[i][0]);
+            instance.setFeatureValue(i, newFeature);
+        }
+    }
+
+    public static void dataTransformation(Instance instance, Integer transformation, double[][] values) {
+        switch (transformation){
+            case NormStd:
+                //normalizeStd(instance, values); //TODO
+            case NormMinMax:
+                normalizeMinMax(instance, values);
         }
     }
 }

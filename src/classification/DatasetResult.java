@@ -11,16 +11,10 @@ public class DatasetResult extends ArrayList<InstanceResult> {
         return labels;
     }
 
-    public double[][] getValues() {
-        int numClasses = this.get(0).getValues().length;
-        double[][] values = new double[numClasses][this.size()];
-        double[] inst;
-        for (int i=0; i<this.size(); i++) {
-            inst = this.get(i).getValues();
-            for (int n=0; n<numClasses; n++) {
-                values[n][i] = inst[n];
-            }
-        }
+    public double[] getValues() {
+        double[] values = new double[this.size()];
+        for (int i=0; i<this.size(); i++)
+            values[i] = this.get(i).getValue();
         return values;
     }
 

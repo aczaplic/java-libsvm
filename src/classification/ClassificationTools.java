@@ -19,7 +19,7 @@ public class ClassificationTools {
         double err = 0.0;
         double y;
         for(int k = 0; k < data.size(); k++) {
-            y = Double.parseDouble(data.getInstance(k).classValue().toString());
+            y = Double.parseDouble(data.getInstance(k).getClassValue().toString());
             err += (y - yPred[k]) * (y - yPred[k]);
         }
         return err/data.size();
@@ -39,7 +39,7 @@ public class ClassificationTools {
         double err = 0;
         Object y;
         for(int k = 0; k < data.size(); k++) {
-            y = data.getInstance(k).classValue();
+            y = data.getInstance(k).getClassValue();
             if (!yPred[k].equals(y)) err++;
         }
         return err/data.size();

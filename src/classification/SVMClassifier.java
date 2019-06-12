@@ -1,14 +1,21 @@
 package classification;
 
+import dataset.BasicInstance;
 import dataset.Dataset;
+import dataset.DatasetTools;
 import dataset.Instance;
 import libsvm.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static classification.InstanceResult.createInstanceResult;
 import static libsvm.svm.svm_load_model;
+import static libsvm.svm.svm_save_model;
 
 
 public class SVMClassifier implements Classifier {
@@ -18,6 +25,7 @@ public class SVMClassifier implements Classifier {
     private svm_problem prob;
     private svm_parameter param;
     private svm_model model;
+    private LinkedHashMap<Integer, double[][]> transform;
 
     /**
      * Creates a new instance of SVMClassifier.
@@ -25,6 +33,7 @@ public class SVMClassifier implements Classifier {
     public SVMClassifier()
     {
         param = new svm_parameter();
+        transform = new LinkedHashMap<>();
 
         param.svm_type = svm_parameter.C_SVC;
         param.kernel_type = svm_parameter.RBF;
@@ -41,6 +50,11 @@ public class SVMClassifier implements Classifier {
         param.nr_weight = 0;
         param.weight_label = null;
         param.weight = null;
+    }
+
+    public void addDataTransformation(Integer transformation, double[][] values)
+    {
+        transform.put(transformation, values);
     }
 
     @Override
@@ -79,7 +93,7 @@ public class SVMClassifier implements Classifier {
                 node.value = features[j];
                 prob.x[i][j] = node;
             }
-            prob.y[i] = Double.parseDouble(train.getInstance(i).classValue().toString());
+            prob.y[i] = Double.parseDouble(train.getInstance(i).getClassValue().toString());
         }
     }
 
@@ -105,7 +119,7 @@ public class SVMClassifier implements Classifier {
         {
             svm_node node = new svm_node();
             node.index = i;
-            node.value = instance.featureValue(i);
+            node.value = instance.getFeatureValue(i);
             test_x[i] = node;
         }
 
@@ -127,14 +141,77 @@ public class SVMClassifier implements Classifier {
             //System.out.print("(value :" + val_prob[0] + ")");
         }
 
-        //if(!instance.classValue().equals(label))
-        //    System.out.println("ID:" + instance.getID() + " (Actual:" + instance.classValue() + " Prediction:" + label + ")");
+        //if(!instance.getClassValue().equals(label))
+        //    System.out.println("ID:" + instance.getID() + " (Actual:" + instance.getClassValue() + " Prediction:" + label + ")");
         return createInstanceResult(label, val_prob, model.param.probability);
     }
 
     @Override
+    public void saveModel(String filename) throws IOException {
+        if (!transform.isEmpty()) {
+            String transformName = ".//out//" + filename + "_transformation.txt";
+            DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(transformName)));
+            for (Map.Entry<Integer, double[][]> entry : transform.entrySet()) {
+                Integer key = entry.getKey();
+                stream.writeBytes("transformation " + DatasetTools.transformTable[key] + "\n");
+                double[][] values = entry.getValue();
+                for (double[] value : values) {
+                    for (double aValue : value) {
+                        stream.writeBytes(aValue + "\t");
+                    }
+                    stream.writeBytes("\n");
+                }
+                stream.writeBytes("\n\n");
+            }
+            stream.close();
+        }
+
+        String modelName = ".//out//" + filename + "_model.txt";
+        svm_save_model(modelName, this.model);
+    }
+
+    @Override
     public svm_model loadModel(String filename) throws IOException {
-        return svm_load_model(filename);
+        System.out.println("\nLoading model parameters from file...");
+        String modelName = ".//out//" + filename + "_model.txt";
+        this.model = svm_load_model(modelName);
+        this.param = model.param;
+
+        try {
+            System.out.println("Loading information about data transformation from file...\n");
+            String transformName = ".//out//" + filename + "_transformation.txt";
+            Integer key = -1;
+            double[][] values;
+            BufferedReader reader  = new BufferedReader(new FileReader(transformName));
+            String var3;
+            while ((var3 = reader.readLine()).startsWith("transformation")) {
+                String[] line = var3.trim().split(" ");
+                for(int i = 0; i < DatasetTools.transformTable.length; i++) {
+                    if (line[1].equals(DatasetTools.transformTable[i])) {
+                        key = i;
+                        break;
+                    }
+                }
+                ArrayList<ArrayList<String>> result = new ArrayList<>();
+                while (!(var3 = reader.readLine()).isEmpty()) {
+                    line = var3.trim().split("\\t");
+                    ArrayList<String> record = new ArrayList<>();
+                    Collections.addAll(record, line);
+                    result.add(record);
+                }
+                values = new double[result.size()][result.get(0).size()];
+                for (int i = 0; i < result.size(); i++) {
+                    ArrayList<String> row = result.get(i);
+                    for (int j = 0; j < row.size(); j++)
+                        values[i][j] = Double.parseDouble(row.get(j));
+                }
+                transform.put(key, values);
+            }
+        } catch (IOException e) {
+            System.err.println("No data transformation file for this model\n");
+        }
+
+        return model;
     }
 
     /**
@@ -206,6 +283,20 @@ public class SVMClassifier implements Classifier {
             }
             catch (Exception e) {}
             System.out.println();
+        }
+    }
+
+    public LinkedHashMap<Integer, double[][]> getTransform() {
+        return transform;
+    }
+
+    public void transform(Instance instance) {
+        if (!transform.isEmpty()) {
+            for (Map.Entry<Integer, double[][]> entry : transform.entrySet()) {
+                Integer key = entry.getKey();
+                double[][] values = entry.getValue();
+                DatasetTools.dataTransformation(instance, key, values);
+            }
         }
     }
 }

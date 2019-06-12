@@ -338,7 +338,7 @@ class Solver {
 	boolean is_free(int i) {  return alpha_status[i] == FREE; }
 
 	// java: information about solution except alpha,
-	// because we cannot return multiple values otherwise...
+	// because we cannot return multiple value otherwise...
 	static class SolutionInfo {
 		double obj;
 		double rho;
@@ -1738,7 +1738,7 @@ public class svm {
 			svm.info("Exceeds max_iter in multiclass_prob\n");
 	}
 
-	// Cross-validation decision values for probability estimates
+	// Cross-validation decision value for probability estimates
 	private static void svm_binary_svc_probability(svm_problem prob, svm_parameter param, double Cp, double Cn, double[] probAB)
 	{
 		int i;
