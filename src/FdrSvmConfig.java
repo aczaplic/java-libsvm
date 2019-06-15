@@ -4,8 +4,10 @@ import mscanlib.ms.msms.dbengines.DbEngineScoring;
 
 public class FdrSvmConfig extends FDRConfig
 {
-	public boolean mComputeSVM=true;
-	public double mQValueThreshold=0.01;
+	public boolean mComputeSVM = true;
+	public double mQValueThreshold = 0.01;
+	public boolean mSaveDataset = false;
+	public boolean mSaveTrainDataset = false;
 	
 	public FdrSvmConfig()
 	{

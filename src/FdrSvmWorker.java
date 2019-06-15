@@ -59,8 +59,8 @@ public final class FdrSvmWorker extends MScanWorker
 	{
 		super(frame);
 
-		this.mSamples=samples;
-		this.mConfig=config;
+		this.mSamples = samples;
+		this.mConfig = config;
 	}
 
 	//
@@ -71,10 +71,10 @@ public final class FdrSvmWorker extends MScanWorker
 	@Override
 	public Object construct()
 	{
-		this.mQValues=new ArrayList<double[][]>(this.mSamples.length);
-		this.mQValuesSVM =new ArrayList<double[][]>(this.mSamples.length);
+		this.mQValues = new ArrayList<double[][]>(this.mSamples.length);
+		this.mQValuesSVM = new ArrayList<double[][]>(this.mSamples.length);
 		
-		for (int i=0;i<this.mSamples.length;i++)
+		for (int i = 0; i<this.mSamples.length; i++)
 			this.computeQValues(this.mSamples[i]);
 		
 		this.updateProgress("Done...",100);	
@@ -119,14 +119,14 @@ public final class FdrSvmWorker extends MScanWorker
 	 */
 	private void computeQValues(Sample sample)
 	{
-		MsMsQuery	queries[]=null;		
-		double		qValues[][]=null,qValuesSVM[][]=null;
+		MsMsQuery queries[] = null;
+		double qValues[][] = null, qValuesSVM[][] = null;
 		
 		//pobranie tablicy zapytan do systemu bazodanowego (obiekty klasy MsMsQuery, zawieraja informacje o widmie oraz przypisanych do niego sekwencjach)
 		if ((queries=sample.getQueries(true))!=null)
 		{	
 			//liczenie q-wartosci na podstawie score Mascota
-			qValues=FDRTools.computeQValues(queries,this.mConfig,this,0);
+			qValues = FDRTools.computeQValues(queries,this.mConfig,this,0);
 			if (qValues!=null)
 			{
 				//zapamiatanie q-wartosci
@@ -137,11 +137,11 @@ public final class FdrSvmWorker extends MScanWorker
 				if (this.mConfig.mComputeSVM)
 				{
 					//liczenie score SVM
-					double scores[]=this.computeSvmScores(queries);
+					double scores[] = this.computeSvmScores(queries);
 	//				//System.out.println(Arrays.toString(scores));
 					
 					//liczenie q-wartosci na podstawie score SVM 
-					qValuesSVM=FDRTools.computeQValues(queries,scores,this.mConfig,this,0);
+					qValuesSVM = FDRTools.computeQValues(queries,scores,this.mConfig,this,0);
 					//System.out.println(Arrays.toString(qValuesSVM[FDRTools.ROW_QVALUE]));
 					
 					//zapamietanie q-wartosci
@@ -166,7 +166,7 @@ public final class FdrSvmWorker extends MScanWorker
 		 */
 		
 		//Tworzenie zbioru treningowego (wszystkie decoy i target o q-wartosciach <= od progu)
-		BasicDataset trainDataset=this.createTrainDataset(queries);
+		BasicDataset trainDataset = this.createTrainDataset(queries);
 		double[][] min_max = DatasetTools.normalizeMinMax(trainDataset);
 
 		//Trenowanie klasyfikatora
@@ -187,23 +187,24 @@ public final class FdrSvmWorker extends MScanWorker
 		 */
 
 		//alokacja tablicy o dlugosci rownej liczbie przypisan
-		int assignmentsCount=(this.mConfig.mOnlyFirst)?queries.length:DbEngineScoring.getAssignmentsCount(queries);
-		double scores[]=new double[assignmentsCount];
-		Object labels[]=new Object[assignmentsCount];
+		int assignmentsCount = (this.mConfig.mOnlyFirst)?queries.length:DbEngineScoring.getAssignmentsCount(queries);
+		double scores[] = new double[assignmentsCount];
+		Object labels[] = new Object[assignmentsCount];
 		MathFun.set(scores,Double.NEGATIVE_INFINITY);
 
-
-//        PrintStream consoleStream=System.out;
-//        try
-//        {
-//            PrintStream fileStream = new PrintStream(new File(".//data//test_data.txt"));
-//            System.setOut(fileStream);
-//        }
-//        catch (Exception e) {}
-//        System.out.println("sequence\tpos_neg\tmass\tmass_error\tcharge\tMS_intensity\tMascot_score\tMIT\tMHT\tMascot_delta_score\tlength\tmissed_cleavages");
+		PrintStream consoleStream = System.out;
+        if (this.mConfig.mSaveDataset) {
+            try
+            {
+                PrintStream fileStream = new PrintStream(new File(".//data//full_data.txt"));
+                System.setOut(fileStream);
+            }
+            catch (Exception e) {}
+            System.out.println("sequence\tpos_neg\tmass\tmass_error\tcharge\tMS_intensity\tMascot_score\tMIT\tMHT\tMascot_delta_score\tlength\tmissed_cleavages");
+        }
 
 		//klasyfikacja wszystkich przypisan (poza tymi, ktore nie maja sekwencji)
-		int counter=0;
+		int counter = 0;
 		for (MsMsQuery query:queries)
 		{
 			for (MsMsAssignment assignment:query.getAssignmentsList())
@@ -212,27 +213,28 @@ public final class FdrSvmWorker extends MScanWorker
 				{
 					BasicInstance instance=new BasicInstance(this.getValues(query,assignment),0);
 
-//					StringBuilder str=new StringBuilder();
-//                    str.append(assignment.getSequence());
-//                    str.append("\t");
-//                    str.append(assignment.getDecoy());
-//					for (double value : instance.allFeaturesValues()) {
-//                        str.append("\t");
-//                        str.append(value);
-//                    }
-//                    System.out.println(str);
+                    if (this.mConfig.mSaveDataset) {
+                        StringBuilder str = new StringBuilder();
+                        str.append(assignment.getSequence());
+                        str.append("\t");
+                        str.append(assignment.getDecoy());
+                        for (double value : instance.allFeaturesValues()) {
+                            str.append("\t");
+                            str.append(value);
+                        }
+                        System.out.println(str);
+                    }
 
 					svm.transform(instance);
 					InstanceResult result=svm.classify(instance);
 					//if (svm.getSVMParameters();
-					scores[counter]=result.getValue();
-					labels[counter]=result.getLabel();
+					scores[counter] = result.getValue();
+					labels[counter] = result.getLabel();
 				}
 				counter++;
 			}
 		}
-//        System.setOut(consoleStream);
-		
+        System.setOut(consoleStream);
 		return(scores);
 	}
 	
@@ -244,6 +246,18 @@ public final class FdrSvmWorker extends MScanWorker
 	private BasicDataset createTrainDataset(MsMsQuery queries[])
 	{
 		BasicDataset dataset=new BasicDataset();
+
+        PrintStream consoleStream = System.out;
+        if (this.mConfig.mSaveTrainDataset) {
+            try
+            {
+                String filename = ".//data//train_data_" + this.mConfig.mQValueThreshold + ".txt";
+                PrintStream fileStream = new PrintStream(new File(filename));
+                System.setOut(fileStream);
+            }
+            catch (Exception e) {}
+            System.out.println("sequence\tpos_neg\tmass\tmass_error\tcharge\tMS_intensity\tMascot_score\tMIT\tMHT\tMascot_delta_score\tlength\tmissed_cleavages");
+        }
 
 		//dla kazdego zapytania
 		for (MsMsQuery query:queries)
@@ -262,10 +276,23 @@ public final class FdrSvmWorker extends MScanWorker
 					{
 						BasicInstance instance=new BasicInstance(assignment.getSequence(), this.getValues(query,assignment),(label==FDRTools.IS_DECOY)?-1:1);
 						dataset.add(instance);
+
+                        if (this.mConfig.mSaveTrainDataset) {
+                            StringBuilder str = new StringBuilder();
+                            str.append(assignment.getSequence());
+                            str.append("\t");
+                            str.append(assignment.getDecoy());
+                            for (double value : instance.allFeaturesValues()) {
+                                str.append("\t");
+                                str.append(value);
+                            }
+                            System.out.println(str);
+                        }
 					}
 				}
 			}
 		}
+        System.setOut(consoleStream);
 		return(dataset);
 	}
 	

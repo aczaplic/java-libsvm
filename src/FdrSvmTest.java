@@ -36,11 +36,14 @@ public class FdrSvmTest implements MScanWorkerListener
 			 * 	Utworzenie konfiguracji
 			 */
 			this.mConfig=new FdrSvmConfig();
-			this.mConfig.mComputeSVM =true;			//liczenie q-wartosci na podstawie score SVM
-			this.mConfig.mQValueThreshold=0.1;		//prog q-wartosci dla zbioru treningowego
+			this.mConfig.mComputeSVM = true;			//liczenie q-wartosci na podstawie score SVM
+			this.mConfig.mQValueThreshold = 0.2;		//prog q-wartosci dla zbioru treningowego
 			
-			this.mConfig.mPlotsMin=0.0;				//zakresy q-wartosci dla wykresow				
-			this.mConfig.mPlotsMax=0.2;
+			this.mConfig.mPlotsMin = 0.0;				//zakresy q-wartosci dla wykresow
+			this.mConfig.mPlotsMax = 0.2;
+
+			this.mConfig.mSaveDataset = false;			//zapis zbiorów danych do plików
+			this.mConfig.mSaveTrainDataset = true;
 			
 			/*
 			 * Uruchomienie watku obliczeniowego
