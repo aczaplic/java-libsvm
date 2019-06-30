@@ -38,12 +38,19 @@ public class FdrSvmTest implements MScanWorkerListener
 			this.mConfig=new FdrSvmConfig();
 			this.mConfig.mComputeSVM = true;			//liczenie q-wartosci na podstawie score SVM
 			this.mConfig.mQValueThreshold = 0.2;		//prog q-wartosci dla zbioru treningowego
+            this.mConfig.mQValueOptimization = 0.05;    //prog q-wartosci do optymalizacji parametrow
 			
 			this.mConfig.mPlotsMin = 0.0;				//zakresy q-wartosci dla wykresow
 			this.mConfig.mPlotsMax = 0.2;
 
 			this.mConfig.mSaveDataset = false;			//zapis zbiorów danych do plików
-			this.mConfig.mSaveTrainDataset = true;
+			this.mConfig.mSaveTrainDataset = false;
+
+            this.mConfig.mBoostIter = 5;                //liczba iteracji wyznaczenia zbioru przykładów pozytywnych na podstawie nowego score
+			this.mConfig.mOptimize = true;              //optymalizacja parametrow modelu SVM
+            this.mConfig.mOptimizeIter = 5;             //liczba iteracji optymalizacji (usrednienie wynikow)
+            this.mConfig.mCVFolds = 3;                  //liczba zbiorow walidacyjnych przy optymalizacji (jeśli 1 -> mOptimizeIter=1)
+            this.mConfig.mKernel = 1;                   //typ jadra SVM
 			
 			/*
 			 * Uruchomienie watku obliczeniowego
@@ -80,6 +87,8 @@ public class FdrSvmTest implements MScanWorkerListener
 		
 		//licznik przypisan o q-wartosci <= od progu
 		int qPos=0;
+		double[] thresholds = {0.01, 0.05, 0.1, 0.2};
+		int[] nrPositive = new int[thresholds.length];
 		
 		//dla kazdego zapytania 
 		for (MsMsQuery query: this.mSample.getQueries())
@@ -91,7 +100,7 @@ public class FdrSvmTest implements MScanWorkerListener
 				{
 					StringBuilder str=new StringBuilder();
 					
-					str.append(query.getNr());	//nr. zapytania
+					str.append(query.getNr());	//nr zapytania
 					str.append("\t");
 					if (assignment.getDecoy()==FDRTools.IS_DECOY)		//baza target/decoy
 						str.append("D");
@@ -140,8 +149,16 @@ public class FdrSvmTest implements MScanWorkerListener
 						str.append(assignment.getQValue());		//q-wartosc
 						
 						//zliczanie przypisan o q-wartosci <= od progu
-						if (assignment.getQValue()<this.mConfig.mQValueThreshold)
-							qPos++;
+                        if (assignment.getDecoy()==FDRTools.IS_TARGET) {
+                            if (assignment.getQValue() < this.mConfig.mQValueThreshold)
+                                qPos++;
+                            for (int n = thresholds.length - 1; n >= 0; n--) {
+                                if (assignment.getQValue() < thresholds[n])
+                                    nrPositive[n]++;
+                                else break;
+                            }
+                        }
+
 					}
 					else
 						str.append("-\t-\t-\t-\t-\t-");
@@ -152,7 +169,10 @@ public class FdrSvmTest implements MScanWorkerListener
 		}
 		System.setOut(consoleStream);
 		
-		System.out.println("Queries with q<" + this.mConfig.mQValueThreshold + ": " + qPos);
+		System.out.println("\nAFTER POST-PROCESSING\nQueries with q-values <");
+		System.out.println(this.mConfig.mQValueThreshold + "(user defined threshold): " + qPos);
+        for (int n=0; n<thresholds.length; n++)
+            System.out.println(thresholds[n] + ": " + nrPositive[n]);
 		System.out.println("Done");
 	}
 

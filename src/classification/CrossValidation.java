@@ -14,8 +14,8 @@ public class CrossValidation {
      * Creates a new object with the provided list od classifiers
      * to fit and use in cross validation.
      *
-     * @param classValue
-     *            the value of class label for instance
+     * @param classifiersList
+     *            the list of classifiers
      */
     public CrossValidation(List<Classifier> classifiersList) {
         this.classifiersList = classifiersList;
@@ -57,8 +57,10 @@ public class CrossValidation {
                 results.put(instance.getID(), result);
             }
         }
-        for (int i=0; i < data.size(); i++)
-            out.add(results.get(i));
+        for (int i=0; i < data.size(); i++) {
+            int ind = data.getInstance(i).getID();
+            out.add(results.get(ind));
+        }
 
         return out;
 
@@ -95,7 +97,7 @@ public class CrossValidation {
      * @return the results of the cross-validation.
      */
     public DatasetResult crossValidation(Dataset data, int numFolds) {
-        return crossValidation(data, numFolds, new Random(System.currentTimeMillis()), false);
+        return crossValidation(data, numFolds, new Random(System.currentTimeMillis()));
     }
 
 }

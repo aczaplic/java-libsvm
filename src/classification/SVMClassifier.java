@@ -60,7 +60,7 @@ public class SVMClassifier implements Classifier {
     @Override
     public void buildClassifier(Dataset data) {
         defineSVMProblem(data);
-        setSVMParameters(svm_parameter.C_SVC, svm_parameter.RBF, 10, 10);
+        //setSVMParameters(svm_parameter.RBF, 10, 10);
         model = svm.svm_train(prob, param);
     }
 
@@ -225,30 +225,38 @@ public class SVMClassifier implements Classifier {
      *            value of the parameter gamma in kernel function
      * @param cost
      *            value of the parameter C of C-SVC, epsilon-SVR, and nu-SVR
+     * @param weight_labels
+     *            labels of classes meaning the order of weights
+     * @param weights
+     *            values of individual weights of cost for each class
      * @param eps
      *            tolerance of termination criterion
      * @param cache_size
      *            cache memory size in MB
      *
      */
-    public void setSVMParameters(int type, int kernel, double gamma, double cost, double eps, double cache_size)
+    public void setSVMParameters(int type, int kernel, double gamma, double cost, int[] weight_labels, double[] weights, double eps, double cache_size, int prob)
     {
         param.svm_type = type;
         param.kernel_type = kernel;
         param.gamma = gamma;
         param.C = cost;
+        if (weights != null) {
+            param.nr_weight = weights.length;
+            param.weight_label = weight_labels;
+            param.weight = weights;
+        }
         param.cache_size = cache_size; //default 100MB
         param.eps = eps; // default 0.001
+        param.probability = prob;
 
-        System.out.println("SVM params:");
+        System.out.println("\nSVM params:");
         printFields(param);
     }
 
     /**
      * Sets provided values of parameters that will be used for training.
      *
-     * @param type
-     *            type of SVM
      * @param kernel
      *            type of kernel function
      * @param gamma
@@ -257,10 +265,29 @@ public class SVMClassifier implements Classifier {
      *            value of the parameter C of C-SVC, epsilon-SVR, and nu-SVR
      *
      */
-    public void setSVMParameters(int type, int kernel, double gamma, double cost)
+    public void setSVMParameters(int kernel, double gamma, double cost)
     {
-        setSVMParameters(type, kernel, gamma, cost, 1e-3, 100);
-        //param.probability = 1;
+        setSVMParameters(svm_parameter.C_SVC, kernel, gamma, cost, null, null, 1e-3, 100, 0);
+    }
+
+    /**
+     * Sets provided values of parameters that will be used for training.
+     *
+     * @param kernel
+     *            type of kernel function
+     * @param gamma
+     *            value of the parameter gamma in kernel function
+     * @param cost
+     *            value of the parameter C of C-SVC, epsilon-SVR, and nu-SVR
+     * @param weight_labels
+     *            labels of classes meaning the order of weights
+     * @param weights
+     *            values of individual weights of cost for each class
+     *
+     */
+    public void setSVMParameters(int kernel, double gamma, double cost,  int[] weight_labels, double[] weights)
+    {
+        setSVMParameters(svm_parameter.C_SVC, kernel, gamma, cost, weight_labels, weights, 1e-3, 100, 0);
     }
 
     /**

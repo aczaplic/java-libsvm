@@ -7,13 +7,17 @@ import java.io.IOException;
 import java.io.Serializable;
 
 public interface Classifier extends Serializable {
+
+    interface ClassifierParameters extends Serializable {
+    }
+
     /**
      * Create a classifier from the given data set.
      *
      * @param data
      *            the data set to be used to create the classifier
      */
-    public void buildClassifier(Dataset data);
+    void buildClassifier(Dataset data);
 
     /**
      * Classify the instance according to this classifier.
@@ -23,7 +27,7 @@ public interface Classifier extends Serializable {
      * @return the instance of InstanceResult class which contains
      *         class label and other evaluated values.
      */
-    public InstanceResult classify(Instance instance);
+    InstanceResult classify(Instance instance);
 
     /**
      * Classifies data set using SVM model and returns
@@ -36,7 +40,7 @@ public interface Classifier extends Serializable {
      *          data set
      *
      */
-    public DatasetResult classify(Dataset test);
+    DatasetResult classify(Dataset test);
 
     /**
      * Save model of classifier to file.
@@ -53,5 +57,5 @@ public interface Classifier extends Serializable {
      *            the path to file
      * @return object of the created classifier model.
      */
-    public Object loadModel(String filename) throws IOException;
+    Object loadModel(String filename) throws IOException;
 }

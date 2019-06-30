@@ -1,13 +1,11 @@
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 
-import classification.ClassificationTools;
-import classification.InstanceResult;
-import classification.SVMClassifier;
+import classification.*;
 import dataset.BasicDataset;
 import dataset.BasicInstance;
+import dataset.Dataset;
 import dataset.DatasetTools;
 import mscanlib.math.MathFun;
 import mscanlib.ms.exp.*;
@@ -18,6 +16,9 @@ import mscanlib.ms.msms.*;
 import mscanlib.ms.msms.dbengines.DbEngineScoring;
 import mscanlib.ui.*;
 import mscanlib.ui.threads.*;
+
+import static java.util.Arrays.sort;
+import static mscanlib.math.MathFun.sum;
 
 public final class FdrSvmWorker extends MScanWorker
 {	
@@ -73,9 +74,9 @@ public final class FdrSvmWorker extends MScanWorker
 	{
 		this.mQValues = new ArrayList<double[][]>(this.mSamples.length);
 		this.mQValuesSVM = new ArrayList<double[][]>(this.mSamples.length);
-		
-		for (int i = 0; i<this.mSamples.length; i++)
-			this.computeQValues(this.mSamples[i]);
+
+        for (Sample mSample : this.mSamples)
+            this.computeQValues(mSample);
 		
 		this.updateProgress("Done...",100);	
 		return "Done";
@@ -127,30 +128,71 @@ public final class FdrSvmWorker extends MScanWorker
 		{	
 			//liczenie q-wartosci na podstawie score Mascota
 			qValues = FDRTools.computeQValues(queries,this.mConfig,this,0);
+
 			if (qValues!=null)
 			{
 				//zapamiatanie q-wartosci
 				FDRTools.setQValues(sample,qValues);				
 				this.mQValues.add(qValues);
+
+                //licznik przypisan o q-wartosci <= od progu
+                int qPos=0;
+                double[] thresholds = {0.01, 0.05, 0.1, 0.2};
+                int[] nrPositive = new int[thresholds.length];
+                for (MsMsQuery query: queries)
+                {
+                    if (query!=null) {
+                        //dla kazdego przypisania z danego zapytania
+                        for (MsMsAssignment assignment : query.getAssignmentsList()) {
+                            if (assignment.getDecoy()==FDRTools.IS_TARGET) {
+                                if (assignment.getQValue() < this.mConfig.mQValueThreshold)
+                                    qPos++;
+                                for (int n = thresholds.length - 1; n >= 0; n--) {
+                                    if (assignment.getQValue() < thresholds[n])
+                                        nrPositive[n]++;
+                                    else break;
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+                System.out.println("\nBEFORE POST-PROCESSING\nQueries with q-values <");
+                System.out.println(this.mConfig.mQValueThreshold + "(user defined threshold): " + qPos);
+                for (int n=0; n<thresholds.length; n++)
+                    System.out.println(thresholds[n] + ": " + nrPositive[n]);
 			
 				//liczenie nowych q-wartosci z uzyciem SVM
 				if (this.mConfig.mComputeSVM)
 				{
-					//liczenie score SVM
-					double scores[] = this.computeSvmScores(queries);
-	//				//System.out.println(Arrays.toString(scores));
-					
-					//liczenie q-wartosci na podstawie score SVM 
-					qValuesSVM = FDRTools.computeQValues(queries,scores,this.mConfig,this,0);
-					//System.out.println(Arrays.toString(qValuesSVM[FDRTools.ROW_QVALUE]));
-					
-					//zapamietanie q-wartosci
-					FDRTools.setQValues(sample,qValuesSVM);
-					this.mQValuesSVM.add(qValuesSVM);
+					this.selfBoostingSVM(sample, queries);
 				}
 			}
 		}
 	}
+
+    /**
+     * Metoda iteracyjnego poprawiania zbioru przykładów pozytywnych
+     *
+     * @param queries
+     */
+    private void selfBoostingSVM(Sample sample, MsMsQuery queries[]) {
+        for (int i = 0; i<this.mConfig.mBoostIter; i++) {
+            //liczenie score SVM
+            double scores[] = this.computeSvmScores(queries, i);
+            //System.out.println(Arrays.toString(scores));
+
+            //liczenie q-wartosci na podstawie score SVM
+            double qValuesSVM[][] = FDRTools.computeQValues(queries,scores,this.mConfig,this,0);
+            //System.out.println(Arrays.toString(qValuesSVM[FDRTools.ROW_QVALUE]));
+
+            //zapamietanie q-wartosci
+            FDRTools.setQValues(sample,qValuesSVM);
+            this.mQValuesSVM.add(qValuesSVM);
+        }
+        //this.mQValuesSVM.add(qValuesSVM); ????
+    }
 
 	
 	/**
@@ -159,19 +201,45 @@ public final class FdrSvmWorker extends MScanWorker
 	 * @param queries
 	 * @return
 	 */
-	private double[] computeSvmScores(MsMsQuery queries[])
+	private double[] computeSvmScores(MsMsQuery queries[], int iteration)
 	{
 		/*
 		 *  Budowanie modelu
 		 */
 		
 		//Tworzenie zbioru treningowego (wszystkie decoy i target o q-wartosciach <= od progu)
-		BasicDataset trainDataset = this.createTrainDataset(queries);
+        Vector<MsMsQuery> tQueries = new Vector<>();
+		BasicDataset trainDataset = this.createTrainDataset(queries, iteration, tQueries);
 		double[][] min_max = DatasetTools.normalizeMinMax(trainDataset);
 
-		//Trenowanie klasyfikatora
+		MsMsQuery trainQueries[] = new MsMsQuery[tQueries.size()];
+		for(int i = 0; i < tQueries.size(); ++i)
+		    trainQueries[i] = tQueries.get(i);
+
+		//Optymalizacja parametrow modelu
+        double C, Cneg_pos, gamma;
+        if (this.mConfig.mOptimize)
+        {
+            int maxAt = optimParameters(trainDataset, trainQueries, min_max);
+            double[] gammaOptim;
+            if (this.mConfig.mKernel == 1)
+                gammaOptim = new double[]{1};
+            else gammaOptim = this.mConfig.mGamma;
+            C = this.mConfig.mC[(maxAt % (this.mConfig.mC.length * this.mConfig.mCneg_pos.length)) / this.mConfig.mCneg_pos.length];
+            Cneg_pos = this.mConfig.mCneg_pos[maxAt % this.mConfig.mCneg_pos.length];
+            gamma = gammaOptim[maxAt / (this.mConfig.mC.length * this.mConfig.mCneg_pos.length)];
+        }
+        else
+        {
+            C = 10;
+            Cneg_pos = 3;
+            gamma = 10;
+        }
+
+        //Trenowanie klasyfikatora
 		SVMClassifier svm = new SVMClassifier();
         svm.addDataTransformation(DatasetTools.NormMinMax, min_max);
+        svm.setSVMParameters(this.mConfig.mKernel, gamma, C, new int[]{1, -1}, new double[]{1, Cneg_pos});
 		svm.buildClassifier(trainDataset);
 
 //        try {
@@ -226,7 +294,7 @@ public final class FdrSvmWorker extends MScanWorker
                     }
 
 					svm.transform(instance);
-					InstanceResult result=svm.classify(instance);
+					InstanceResult result = svm.classify(instance);
 					//if (svm.getSVMParameters();
 					scores[counter] = result.getValue();
 					labels[counter] = result.getLabel();
@@ -243,15 +311,15 @@ public final class FdrSvmWorker extends MScanWorker
 	 * @param queries
 	 * @return
 	 */
-	private BasicDataset createTrainDataset(MsMsQuery queries[])
+	private BasicDataset createTrainDataset(MsMsQuery queries[], int iteration, Vector<MsMsQuery> trainQueries)
 	{
-		BasicDataset dataset=new BasicDataset();
+		BasicDataset dataset = new BasicDataset();
 
         PrintStream consoleStream = System.out;
         if (this.mConfig.mSaveTrainDataset) {
             try
             {
-                String filename = ".//data//train_data_" + this.mConfig.mQValueThreshold + ".txt";
+                String filename = ".//data//train_data_" + this.mConfig.mQValueThreshold + "_iter_" + (iteration+1) + ".txt";
                 PrintStream fileStream = new PrintStream(new File(filename));
                 System.setOut(fileStream);
             }
@@ -262,6 +330,8 @@ public final class FdrSvmWorker extends MScanWorker
 		//dla kazdego zapytania
 		for (MsMsQuery query:queries)
 		{
+		    int assignmentsTrain[] = new int[query.getAssignmentsCount()];
+		    int i = 0;
 			//dla kazdego przypisania do widma z danego zapytania
 			for (MsMsAssignment assignment:query.getAssignmentsList())
 			{
@@ -274,6 +344,7 @@ public final class FdrSvmWorker extends MScanWorker
 					//sprawdzenie warunkow przynaleznosci do zbioru treningowego (z bazy decoy, albo z target z q <= od progu)
 					if (label==FDRTools.IS_DECOY || (label==FDRTools.IS_TARGET && assignment.getQValue()<=this.mConfig.mQValueThreshold))
 					{
+					    assignmentsTrain[i] = 1;
 						BasicInstance instance=new BasicInstance(assignment.getSequence(), this.getValues(query,assignment),(label==FDRTools.IS_DECOY)?-1:1);
 						dataset.add(instance);
 
@@ -290,11 +361,80 @@ public final class FdrSvmWorker extends MScanWorker
                         }
 					}
 				}
+				i++;
 			}
+			if (sum(assignmentsTrain)>0)
+            {
+                MsMsQuery tmpQuery = new MsMsQuery(query);
+                for (i=assignmentsTrain.length-1; i>=0; i--)
+                    if (assignmentsTrain[i]==0)
+                        tmpQuery.removeAssignment(i);
+                trainQueries.add(tmpQuery);
+            }
 		}
         System.setOut(consoleStream);
 		return(dataset);
 	}
+
+    /**
+     * Metoda optymalizyjaca parametry C i gamma modelu SVM z uzyciem walidacji krzyzowej
+     * wedlug kryterium liczby pozytywnych identyfikacji ponizej zadanego progu q-wartosci
+     * @param trainDataset
+     * @param trainQueries
+     * @param min_max
+     * @return
+     */
+	private int optimParameters(Dataset trainDataset, MsMsQuery[] trainQueries, double[][] min_max)
+    {
+        double[] gammaOptim;
+        if (this.mConfig.mKernel == 1)
+            gammaOptim = new double[]{1};
+        else gammaOptim = this.mConfig.mGamma;
+
+        int numPos[] = new int[gammaOptim.length*this.mConfig.mC.length*this.mConfig.mCneg_pos.length];
+
+        if (this.mConfig.mCVFolds == 1) this.mConfig.mOptimizeIter = 1;
+        for (int iter = 0; iter < this.mConfig.mOptimizeIter; iter++) {
+            int n = 0;
+            for (double gamma : gammaOptim) {
+                for (double C : this.mConfig.mC) {
+                    for (double Cneg_pos : this.mConfig.mCneg_pos) {
+                        List<Classifier> models = new ArrayList<>();
+                        for (int i = 0; i < this.mConfig.mCVFolds; i++) {
+                            SVMClassifier svm = new SVMClassifier();
+                            svm.addDataTransformation(DatasetTools.NormMinMax, min_max);
+                            int[] weight_labels = {1, -1};
+                            double[] weight = {1, Cneg_pos};
+                            svm.setSVMParameters(this.mConfig.mKernel, gamma, C, weight_labels, weight);
+                            models.add(svm);
+                        }
+
+                        CrossValidation cv = new CrossValidation(models);
+                        DatasetResult results = cv.crossValidation(trainDataset, this.mConfig.mCVFolds, new Random(111*iter), true);
+                        double scores[] = results.getValues();
+
+                        //liczenie q-wartosci na podstawie score SVM
+                        double qValuesSVM[][] = FDRTools.computeQValues(trainQueries, scores, this.mConfig, this, 0);
+                        for (int i = 0; i < qValuesSVM[0].length; i++)
+                            if (qValuesSVM[3][i] < this.mConfig.mQValueOptimization && qValuesSVM[3][i] == FDRTools.IS_TARGET)
+                                numPos[n]++;
+
+                        n++;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < numPos.length; i++) {
+            numPos[i] /= this.mConfig.mOptimizeIter;
+        }
+
+        //Wybor najlepszej kombinacji wartosci parametrow pog wzgledem liczby prawidlowych identyfikacji ponizej zadanego progu q-wartosci
+        int maxAt = 0;
+        for (int i = 0; i < numPos.length; i++) {
+            maxAt = numPos[i] > numPos[maxAt] ? i : maxAt;
+        }
+        return  maxAt;
+    }
 	
 	/**
 	 * Metoda liczaca cechy na podstawie zapytania i przypisania
