@@ -17,14 +17,15 @@ public class FdrSvmConfig extends FDRConfig
 	public double[] mC = {0.1, 1, 10, 100};
 	public double[] mCneg_pos = {1, 3, 10};
 	public double[] mGamma = {0.01, 0.05, 1, 5, 10};
+	public int mProbabilityCount = 1;
 	
 	public FdrSvmConfig()
 	{
-		this.mDatabase=FDRTools.DB_JOYNED;	
-		this.mScoreMethod=DbEngineScoring.SCORE_MMT;
-		this.mBothDbMethod=FDRTools.BOTH_EXCLUDE;
+		this.mDatabase = FDRTools.DB_JOYNED;
+		this.mScoreMethod = DbEngineScoring.SCORE_MMT;
+		this.mBothDbMethod = FDRTools.BOTH_EXCLUDE;
 		
-		this.mPlotsMin=0;
-		this.mPlotsMax=0.2;
+		this.mPlotsMin = 0;
+		this.mPlotsMax = 0.2;
 	}
 }

@@ -30,7 +30,7 @@ public class InstanceResult implements ClassificationResult {
         if (probability == 0)
             return new InstanceResult(label, val_prob, null);
         else
-            return new InstanceResult(label, null, val_prob);
+            return new InstanceResult(label, new double[]{Double.NaN}, val_prob);
     }
 
     @Override
@@ -46,5 +46,12 @@ public class InstanceResult implements ClassificationResult {
     @Override
     public double[] getProbability() {
         return probability;
+    }
+
+    public double getScore(int classIndex) {
+        if (probability == null)
+            return value;
+        else
+            return probability[classIndex];
     }
 }

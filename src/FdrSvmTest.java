@@ -50,7 +50,7 @@ public class FdrSvmTest implements MScanWorkerListener
 			this.mConfig.mOptimize = true;              //optymalizacja parametrow modelu SVM
             this.mConfig.mOptimizeIter = 5;             //liczba iteracji optymalizacji (usrednienie wynikow)
             this.mConfig.mCVFolds = 3;                  //liczba zbiorow walidacyjnych przy optymalizacji (jeśli 1 -> mOptimizeIter=1)
-            this.mConfig.mKernel = 1;                   //typ jadra SVM
+            this.mConfig.mKernel = 2;                   //typ jadra SVM
 			
 			/*
 			 * Uruchomienie watku obliczeniowego

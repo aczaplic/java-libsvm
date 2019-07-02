@@ -30,4 +30,11 @@ public class DatasetResult extends ArrayList<InstanceResult> {
         }
         return probability;
     }
+
+    public double[] getScores(int classIndex) {
+        double[] scores = new double[this.size()];
+        for (int i=0; i<this.size(); i++)
+            scores[i] = this.get(i).getScore(classIndex);
+        return scores;
+    }
 }

@@ -59,6 +59,7 @@ public class SVMClassifier implements Classifier {
 
     @Override
     public void buildClassifier(Dataset data) {
+        Collections.shuffle(data);
         defineSVMProblem(data);
         //setSVMParameters(svm_parameter.RBF, 10, 10);
         model = svm.svm_train(prob, param);
@@ -250,6 +251,9 @@ public class SVMClassifier implements Classifier {
         param.eps = eps; // default 0.001
         param.probability = prob;
 
+        if (model != null)
+            model.param = param;
+
         System.out.println("\nSVM params:");
         printFields(param);
     }
@@ -285,9 +289,9 @@ public class SVMClassifier implements Classifier {
      *            values of individual weights of cost for each class
      *
      */
-    public void setSVMParameters(int kernel, double gamma, double cost,  int[] weight_labels, double[] weights)
+    public void setSVMParameters(int kernel, double gamma, double cost, int[] weight_labels, double[] weights, int prob)
     {
-        setSVMParameters(svm_parameter.C_SVC, kernel, gamma, cost, weight_labels, weights, 1e-3, 100, 0);
+        setSVMParameters(svm_parameter.C_SVC, kernel, gamma, cost, weight_labels, weights, 1e-3, 100, prob);
     }
 
     /**
@@ -325,5 +329,13 @@ public class SVMClassifier implements Classifier {
                 DatasetTools.dataTransformation(instance, key, values);
             }
         }
+    }
+
+    public svm_parameter getSVMParameters() {
+        return this.model.param;
+    }
+
+    public svm_model getSVMModel() {
+        return this.model;
     }
 }

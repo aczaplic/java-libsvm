@@ -25,12 +25,12 @@ public final class FdrSvmWorker extends MScanWorker
 	/**
 	 * Konfiguracja
 	 */
-	private FdrSvmConfig mConfig=null;
+	private FdrSvmConfig mConfig = null;
 	
 	/**
 	 * Tablica probek
 	 */
-	private Sample mSamples[]=null;
+	private Sample mSamples[] = null;
 	
 	/**
 	 * Listy tablic z wynikami liczenia q-wartosci (po jednaj na probke)
@@ -47,8 +47,8 @@ public final class FdrSvmWorker extends MScanWorker
 	 * Liczbie kolumn rowna jest dlugosci tablic wejsciowych (kazda kolumna odpowida jednemu przypisaniu).
 	 * Elementy w wierszach sa posortowane zgodnie z rosnacymi q-wartosciami (malejacym score).
 	 */
-	private List<double[][]>	mQValues=null;
-	private List<double[][]> mQValuesSVM=null;
+	private List<double[][]>	mQValues = null;
+	private List<double[][]> mQValuesSVM = null;
 	
 	/**
 	 * Konstruktor
@@ -73,7 +73,7 @@ public final class FdrSvmWorker extends MScanWorker
 	public Object construct()
 	{
 		this.mQValues = new ArrayList<double[][]>(this.mSamples.length);
-		this.mQValuesSVM = new ArrayList<double[][]>(this.mSamples.length);
+		this.mQValuesSVM = new ArrayList<double[][]>(this.mSamples.length*this.mConfig.mBoostIter);
 
         for (Sample mSample : this.mSamples)
             this.computeQValues(mSample);
@@ -120,8 +120,8 @@ public final class FdrSvmWorker extends MScanWorker
 	 */
 	private void computeQValues(Sample sample)
 	{
-		MsMsQuery queries[] = null;
-		double qValues[][] = null, qValuesSVM[][] = null;
+		MsMsQuery queries[];
+		double qValues[][];
 		
 		//pobranie tablicy zapytan do systemu bazodanowego (obiekty klasy MsMsQuery, zawieraja informacje o widmie oraz przypisanych do niego sekwencjach)
 		if ((queries=sample.getQueries(true))!=null)
@@ -141,10 +141,10 @@ public final class FdrSvmWorker extends MScanWorker
                 int[] nrPositive = new int[thresholds.length];
                 for (MsMsQuery query: queries)
                 {
-                    if (query!=null) {
+                    if (query != null) {
                         //dla kazdego przypisania z danego zapytania
                         for (MsMsAssignment assignment : query.getAssignmentsList()) {
-                            if (assignment.getDecoy()==FDRTools.IS_TARGET) {
+                            if (assignment.getDecoy() == FDRTools.IS_TARGET) {
                                 if (assignment.getQValue() < this.mConfig.mQValueThreshold)
                                     qPos++;
                                 for (int n = thresholds.length - 1; n >= 0; n--) {
@@ -160,7 +160,7 @@ public final class FdrSvmWorker extends MScanWorker
 
                 System.out.println("\nBEFORE POST-PROCESSING\nQueries with q-values <");
                 System.out.println(this.mConfig.mQValueThreshold + "(user defined threshold): " + qPos);
-                for (int n=0; n<thresholds.length; n++)
+                for (int n = 0; n < thresholds.length; n++)
                     System.out.println(thresholds[n] + ": " + nrPositive[n]);
 			
 				//liczenie nowych q-wartosci z uzyciem SVM
@@ -239,7 +239,7 @@ public final class FdrSvmWorker extends MScanWorker
         //Trenowanie klasyfikatora
 		SVMClassifier svm = new SVMClassifier();
         svm.addDataTransformation(DatasetTools.NormMinMax, min_max);
-        svm.setSVMParameters(this.mConfig.mKernel, gamma, C, new int[]{1, -1}, new double[]{1, Cneg_pos});
+        svm.setSVMParameters(this.mConfig.mKernel, gamma, C, new int[]{1, -1}, new double[]{1, Cneg_pos}, this.mConfig.mProbabilityCount);
 		svm.buildClassifier(trainDataset);
 
 //        try {
@@ -257,7 +257,7 @@ public final class FdrSvmWorker extends MScanWorker
 		//alokacja tablicy o dlugosci rownej liczbie przypisan
 		int assignmentsCount = (this.mConfig.mOnlyFirst)?queries.length:DbEngineScoring.getAssignmentsCount(queries);
 		double scores[] = new double[assignmentsCount];
-		Object labels[] = new Object[assignmentsCount];
+//		Object labels[] = new Object[assignmentsCount];
 		MathFun.set(scores,Double.NEGATIVE_INFINITY);
 
 		PrintStream consoleStream = System.out;
@@ -295,9 +295,8 @@ public final class FdrSvmWorker extends MScanWorker
 
 					svm.transform(instance);
 					InstanceResult result = svm.classify(instance);
-					//if (svm.getSVMParameters();
-					scores[counter] = result.getValue();
-					labels[counter] = result.getLabel();
+                    scores[counter] = result.getScore(0); //prawdopodobieństwo klasy pozytywnej lub wartość
+//					labels[counter] = result.getLabel();
 				}
 				counter++;
 			}
@@ -363,11 +362,11 @@ public final class FdrSvmWorker extends MScanWorker
 				}
 				i++;
 			}
-			if (sum(assignmentsTrain)>0)
+			if (sum(assignmentsTrain) > 0)
             {
                 MsMsQuery tmpQuery = new MsMsQuery(query);
-                for (i=assignmentsTrain.length-1; i>=0; i--)
-                    if (assignmentsTrain[i]==0)
+                for (i = assignmentsTrain.length-1; i >= 0; i--)
+                    if (assignmentsTrain[i] == 0)
                         tmpQuery.removeAssignment(i);
                 trainQueries.add(tmpQuery);
             }
@@ -405,13 +404,13 @@ public final class FdrSvmWorker extends MScanWorker
                             svm.addDataTransformation(DatasetTools.NormMinMax, min_max);
                             int[] weight_labels = {1, -1};
                             double[] weight = {1, Cneg_pos};
-                            svm.setSVMParameters(this.mConfig.mKernel, gamma, C, weight_labels, weight);
+                            svm.setSVMParameters(this.mConfig.mKernel, gamma, C, weight_labels, weight, this.mConfig.mProbabilityCount);
                             models.add(svm);
                         }
 
                         CrossValidation cv = new CrossValidation(models);
                         DatasetResult results = cv.crossValidation(trainDataset, this.mConfig.mCVFolds, new Random(111*iter), true);
-                        double scores[] = results.getValues();
+                        double scores[] = results.getScores(0);
 
                         //liczenie q-wartosci na podstawie score SVM
                         double qValuesSVM[][] = FDRTools.computeQValues(trainQueries, scores, this.mConfig, this, 0);
@@ -462,5 +461,5 @@ public final class FdrSvmWorker extends MScanWorker
 			values[i]=valuesList.get(i);
 		
 		return(values);
-	}	
+	}
 }
