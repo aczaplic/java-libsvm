@@ -11,13 +11,17 @@ import mscanlib.math.MathFun;
 import mscanlib.ms.exp.*;
 import mscanlib.ms.fdr.FDRConfig;
 import mscanlib.ms.fdr.FDRTools;
+import mscanlib.ms.mass.AminoAcidSequence;
+import mscanlib.ms.mass.Enzyme;
 import mscanlib.ms.mass.MassTools;
 import mscanlib.ms.msms.*;
 import mscanlib.ms.msms.dbengines.DbEngineScoring;
+import mscanlib.ms.msms.dbengines.mscandb.MScanDbScoring;
+import mscanlib.ms.msms.dbengines.xtandem.XTandemScoring;
+import mscanlib.ms.rt.RTTools;
 import mscanlib.ui.*;
 import mscanlib.ui.threads.*;
 
-import static java.util.Arrays.sort;
 import static mscanlib.math.MathFun.sum;
 
 public final class FdrSvmWorker extends MScanWorker
@@ -25,12 +29,12 @@ public final class FdrSvmWorker extends MScanWorker
 	/**
 	 * Konfiguracja
 	 */
-	private FdrSvmConfig mConfig = null;
+	private FdrSvmConfig mConfig;
 	
 	/**
 	 * Tablica probek
 	 */
-	private Sample mSamples[] = null;
+	private Sample mSamples[];
 	
 	/**
 	 * Listy tablic z wynikami liczenia q-wartosci (po jednaj na probke)
@@ -47,7 +51,7 @@ public final class FdrSvmWorker extends MScanWorker
 	 * Liczbie kolumn rowna jest dlugosci tablic wejsciowych (kazda kolumna odpowida jednemu przypisaniu).
 	 * Elementy w wierszach sa posortowane zgodnie z rosnacymi q-wartosciami (malejacym score).
 	 */
-	private List<double[][]>	mQValues = null;
+	private List<double[][]> mQValues = null;
 	private List<double[][]> mQValuesSVM = null;
 	
 	/**
@@ -64,7 +68,6 @@ public final class FdrSvmWorker extends MScanWorker
 		this.mConfig = config;
 	}
 
-	//
 	//MScanWorker
 	/**
 	 * Metoda wywolywana przy uruchomieniu watku
@@ -141,13 +144,17 @@ public final class FdrSvmWorker extends MScanWorker
                 int[] nrPositive = new int[thresholds.length];
                 for (MsMsQuery query: queries)
                 {
-                    if (query != null) {
+                    if (query != null)
+                    {
                         //dla kazdego przypisania z danego zapytania
-                        for (MsMsAssignment assignment : query.getAssignmentsList()) {
-                            if (assignment.getDecoy() == FDRTools.IS_TARGET) {
+                        for (MsMsAssignment assignment : query.getAssignmentsList())
+                        {
+                            if (assignment.getDecoy() == FDRTools.IS_TARGET)
+                            {
                                 if (assignment.getQValue() < this.mConfig.mQValueThreshold)
                                     qPos++;
-                                for (int n = thresholds.length - 1; n >= 0; n--) {
+                                for (int n = thresholds.length - 1; n >= 0; n--)
+                                {
                                     if (assignment.getQValue() < thresholds[n])
                                         nrPositive[n]++;
                                     else break;
@@ -177,10 +184,12 @@ public final class FdrSvmWorker extends MScanWorker
      *
      * @param queries
      */
-    private void selfBoostingSVM(Sample sample, MsMsQuery queries[]) {
-        for (int i = 0; i<this.mConfig.mBoostIter; i++) {
+    private void selfBoostingSVM(Sample sample, MsMsQuery queries[])
+    {
+        for (int i = 0; i<this.mConfig.mBoostIter; i++)
+        {
             //liczenie score SVM
-            double scores[] = this.computeSvmScores(queries, i);
+			double scores[] = this.computeSvmScores(sample,queries, i);
             //System.out.println(Arrays.toString(scores));
 
             //liczenie q-wartosci na podstawie score SVM
@@ -201,7 +210,7 @@ public final class FdrSvmWorker extends MScanWorker
 	 * @param queries
 	 * @return
 	 */
-	private double[] computeSvmScores(MsMsQuery queries[], int iteration)
+	private double[] computeSvmScores(Sample sample, MsMsQuery queries[], int iteration)
 	{
 		/*
 		 *  Budowanie modelu
@@ -209,7 +218,7 @@ public final class FdrSvmWorker extends MScanWorker
 		
 		//Tworzenie zbioru treningowego (wszystkie decoy i target o q-wartosciach <= od progu)
         Vector<MsMsQuery> tQueries = new Vector<>();
-		BasicDataset trainDataset = this.createTrainDataset(queries, iteration, tQueries);
+		BasicDataset trainDataset = this.createTrainDataset(sample, queries, iteration, tQueries);
 		double[][] min_max = DatasetTools.normalizeMinMax(trainDataset);
 
 		MsMsQuery trainQueries[] = new MsMsQuery[tQueries.size()];
@@ -242,10 +251,13 @@ public final class FdrSvmWorker extends MScanWorker
         svm.setSVMParameters(this.mConfig.mKernel, gamma, C, new int[]{1, -1}, new double[]{1, Cneg_pos}, this.mConfig.mProbabilityCount);
 		svm.buildClassifier(trainDataset);
 
-//        try {
+//        try
+//        {
 //            svm.saveModel("test");
 //            svm.loadModel("test");
-//        } catch (IOException e) {
+//        }
+//        catch (IOException e)
+//        {
 //            System.err.println("\nNo such file with model - check the name\n");
 //            e.printStackTrace();
 //        }
@@ -261,7 +273,8 @@ public final class FdrSvmWorker extends MScanWorker
 		MathFun.set(scores,Double.NEGATIVE_INFINITY);
 
 		PrintStream consoleStream = System.out;
-        if (this.mConfig.mSaveDataset) {
+        if (this.mConfig.mSaveDataset)
+        {
             try
             {
                 PrintStream fileStream = new PrintStream(new File(".//data//full_data.txt"));
@@ -279,14 +292,16 @@ public final class FdrSvmWorker extends MScanWorker
 			{
 				if (!assignment.isNA())	
 				{
-					BasicInstance instance=new BasicInstance(this.getValues(query,assignment),0);
+					BasicInstance instance=new BasicInstance(this.getValues(sample,query,assignment),0);
 
-                    if (this.mConfig.mSaveDataset) {
+                    if (this.mConfig.mSaveDataset)
+                    {
                         StringBuilder str = new StringBuilder();
                         str.append(assignment.getSequence());
                         str.append("\t");
                         str.append(assignment.getDecoy());
-                        for (double value : instance.allFeaturesValues()) {
+                        for (double value : instance.allFeaturesValues())
+                        {
                             str.append("\t");
                             str.append(value);
                         }
@@ -310,12 +325,13 @@ public final class FdrSvmWorker extends MScanWorker
 	 * @param queries
 	 * @return
 	 */
-	private BasicDataset createTrainDataset(MsMsQuery queries[], int iteration, Vector<MsMsQuery> trainQueries)
+	private BasicDataset createTrainDataset(Sample sample, MsMsQuery queries[], int iteration, Vector<MsMsQuery> trainQueries)
 	{
 		BasicDataset dataset = new BasicDataset();
 
         PrintStream consoleStream = System.out;
-        if (this.mConfig.mSaveTrainDataset) {
+        if (this.mConfig.mSaveTrainDataset)
+        {
             try
             {
                 String filename = ".//data//train_data_" + this.mConfig.mQValueThreshold + "_iter_" + (iteration+1) + ".txt";
@@ -344,15 +360,17 @@ public final class FdrSvmWorker extends MScanWorker
 					if (label==FDRTools.IS_DECOY || (label==FDRTools.IS_TARGET && assignment.getQValue()<=this.mConfig.mQValueThreshold))
 					{
 					    assignmentsTrain[i] = 1;
-						BasicInstance instance=new BasicInstance(assignment.getSequence(), this.getValues(query,assignment),(label==FDRTools.IS_DECOY)?-1:1);
+						BasicInstance instance = new BasicInstance(assignment.getSequence(), this.getValues(sample,query,assignment),(label==FDRTools.IS_DECOY)?-1:1);
 						dataset.add(instance);
 
-                        if (this.mConfig.mSaveTrainDataset) {
+                        if (this.mConfig.mSaveTrainDataset)
+                        {
                             StringBuilder str = new StringBuilder();
                             str.append(assignment.getSequence());
                             str.append("\t");
                             str.append(assignment.getDecoy());
-                            for (double value : instance.allFeaturesValues()) {
+                            for (double value : instance.allFeaturesValues())
+                            {
                                 str.append("\t");
                                 str.append(value);
                             }
@@ -395,11 +413,15 @@ public final class FdrSvmWorker extends MScanWorker
         if (this.mConfig.mCVFolds == 1) this.mConfig.mOptimizeIter = 1;
         for (int iter = 0; iter < this.mConfig.mOptimizeIter; iter++) {
             int n = 0;
-            for (double gamma : gammaOptim) {
-                for (double C : this.mConfig.mC) {
-                    for (double Cneg_pos : this.mConfig.mCneg_pos) {
+            for (double gamma : gammaOptim)
+            {
+                for (double C : this.mConfig.mC)
+                {
+                    for (double Cneg_pos : this.mConfig.mCneg_pos)
+                    {
                         List<Classifier> models = new ArrayList<>();
-                        for (int i = 0; i < this.mConfig.mCVFolds; i++) {
+                        for (int i = 0; i < this.mConfig.mCVFolds; i++)
+                        {
                             SVMClassifier svm = new SVMClassifier();
                             svm.addDataTransformation(DatasetTools.NormMinMax, min_max);
                             int[] weight_labels = {1, -1};
@@ -423,15 +445,15 @@ public final class FdrSvmWorker extends MScanWorker
                 }
             }
         }
-        for (int i = 0; i < numPos.length; i++) {
+        for (int i = 0; i < numPos.length; i++)
+        {
             numPos[i] /= this.mConfig.mOptimizeIter;
         }
 
         //Wybor najlepszej kombinacji wartosci parametrow pog wzgledem liczby prawidlowych identyfikacji ponizej zadanego progu q-wartosci
         int maxAt = 0;
-        for (int i = 0; i < numPos.length; i++) {
+        for (int i = 0; i < numPos.length; i++)
             maxAt = numPos[i] > numPos[maxAt] ? i : maxAt;
-        }
         return  maxAt;
     }
 	
@@ -441,25 +463,71 @@ public final class FdrSvmWorker extends MScanWorker
 	 * @param assignment
 	 * @return
 	 */
-	private double[] getValues(MsMsQuery query, MsMsAssignment assignment)
+	private double[] getValues(Sample sample,MsMsQuery query, MsMsAssignment assignment)
 	{
 		ArrayList<Double> valuesList=new ArrayList<>();
-				
+
 		valuesList.add(query.getMass());												//Masa (mass)
 		valuesList.add(MassTools.getDelta(query.getMass(),assignment.getCalcMass()));	//Blad masy w Da (mass_error)
 		valuesList.add((double)query.getCharge());										//Stopien naladowanie (charge)
-		valuesList.add(query.getPrecursorIntensity());									//Wysokosc piku prekursowa (MS_intensity)
-		valuesList.add(assignment.getScore());											//Score Mascota (Mascot_score)	
+		valuesList.add(query.getPrecursorIntensity());									//Wysokosc piku prekursora (MS_intensity)
+		valuesList.add(assignment.getScore());											//Score Mascota (Mascot_score)
 		valuesList.add(query.getMIT());													//MIT  (MIT)
 		valuesList.add(query.getMHT());													//MHT  (MHT)
-		valuesList.add(assignment.getScoreDelta());										//Score Delta Mascota (Mascot_delta_score)		
+		valuesList.add(assignment.getScoreDelta());										//Score Delta Mascota (Mascot_delta_score)
 		valuesList.add((double)assignment.getSequenceLength());							//Dlugosc sekwencji (length)
-		valuesList.add((double)assignment.getMissedCleavagesCount());					//Lisczba niedotrawek (missed_cleavages)
-		
-		double values[]=new double[valuesList.size()];
-		for (int i=0;i<values.length;i++)
-			values[i]=valuesList.get(i);
-		
+
+		//Blad masy w PPM (Parts Per Million) - dla MS jest to lepsza miara bledu
+		valuesList.add(MassTools.getDeltaPPM(query.getMass(),assignment.getCalcMass()));
+
+		//Cechy liczone sa tylko jesli uzywany byl enzym proteolityczny
+		Enzyme enzyme = sample.getHeader().getEnzyme();
+		if (enzyme != null && !enzyme.getName().equals("None"))
+		{
+			//liczba liczba niedotrawek (missed_cleavages)
+			valuesList.add((double)assignment.getMissedCleavagesCount());
+
+			//specyficznosc N-konca (n-term_specificity) i C-konca (c-term_specificity) - liczone tylko gdy enzym jest semispecyficzny
+			if (enzyme.isSemispecific())
+			{
+				valuesList.add(assignment.isNTermSpecific(enzyme,false)?1.0:0.0);
+				valuesList.add(assignment.isCTermSpecific(enzyme,false)?1.0:0.0);
+			}
+		}
+
+		//wzgledny czas retencji, odniesiony do maksymalnego czasu w probce
+		double rtScale=RTTools.min2sec(sample.getRtRange(1));
+		valuesList.add(query.getRtInSec()/rtScale);
+
+		//wzgledne odstepstwo od teoretycznego czasu retencji, odniesione do maksymalnego czasu w probce (RT_error)
+		valuesList.add((assignment.getCalcRtInSec()-query.getRtInSec())/rtScale);
+
+		//score MScanDB i X!Tandem
+		AminoAcidSequence sequence = new AminoAcidSequence(assignment.getSequence(true),assignment.getPTMsString(),sample.getHeader().getVariablePTMsMap(),sample.getHeader().getFixedPTMs());
+		valuesList.add(MScanDbScoring.processSpectrumAndComputeScore(query.getSpectrum(),sequence,query.getCharge(),this.mConfig.mScoreConfig));
+		valuesList.add(XTandemScoring.processSpectrumAndComputeScore(query.getSpectrum(),sequence,query.getMz(),query.getCharge(),this.mConfig.mScoreConfig));
+
+		//liczba widm, do ktorych przypisano ta sama sekwencje (psm_count)
+		MsMsPeptideHit peptide = sample.getPeptide(assignment.getSequenceKey());
+		valuesList.add((double)peptide.getQueriesCount());
+
+		//liczba zidentyfikowanych peptydow bialka, z ktorego pochodzi dana sekwencja (wartosc maksymalna jesli jest wiecej takich bialek)
+		int pepCount = 0;
+		for (String id:peptide.getProteins().keySet())
+		{
+			int n = sample.getProtein(id).getPeptidesCount();
+            if (n > pepCount)
+				pepCount = n;
+		}
+		valuesList.add((double)pepCount);
+
+        //e-value
+        valuesList.add(assignment.getEValue());
+
+		double values[] = new double[valuesList.size()];
+		for (int i = 0; i < values.length; i++)
+			values[i] = valuesList.get(i);
+
 		return(values);
 	}
 }

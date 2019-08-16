@@ -1,8 +1,12 @@
 import java.io.File;
 import java.io.PrintStream;
+import java.util.ArrayList;
 
+import libsvm.svm_parameter;
 import mscanlib.common.MScanException;
+import mscanlib.math.stats.regression.LS;
 import mscanlib.ms.exp.Sample;
+import mscanlib.ms.exp.SampleTools;
 import mscanlib.ms.fdr.FDRTools;
 import mscanlib.ms.mass.MassTools;
 import mscanlib.ms.msms.MsMsAssignment;
@@ -10,15 +14,16 @@ import mscanlib.ms.msms.MsMsProteinHit;
 import mscanlib.ms.msms.MsMsQuery;
 import mscanlib.ms.msms.dbengines.mascot.io.MascotDatFileReader;
 import mscanlib.ms.msms.io.MsMsScanConfig;
+import mscanlib.ms.rt.RTPredictor;
 import mscanlib.ui.interfaces.MScanWorkerListener;
 import mscanlib.ui.threads.MScanWorker;
 
 public class FdrSvmTest implements MScanWorkerListener
 {
-	private Sample			mSample=null;
-	private String 			mFilename=null;
-	private FdrSvmConfig mConfig=null;
-	
+	private Sample mSample;
+	private String mFilename;
+	private FdrSvmConfig mConfig = null;
+
 	/**
 	 * Konstruktor
 	 * @param filename
@@ -36,22 +41,26 @@ public class FdrSvmTest implements MScanWorkerListener
 			 * 	Utworzenie konfiguracji
 			 */
 			this.mConfig=new FdrSvmConfig();
-			this.mConfig.mComputeSVM = true;			//liczenie q-wartosci na podstawie score SVM
-			this.mConfig.mQValueThreshold = 0.2;		//prog q-wartosci dla zbioru treningowego
-            this.mConfig.mQValueOptimization = 0.05;    //prog q-wartosci do optymalizacji parametrow
+			this.mConfig.mComputeSVM = true;				//liczenie q-wartosci na podstawie score SVM
+			this.mConfig.mQValueThreshold = 0.2;			//prog q-wartosci dla zbioru treningowego
+            this.mConfig.mQValueOptimization = 0.05;    	//prog q-wartosci do optymalizacji parametrow
 			
-			this.mConfig.mPlotsMin = 0.0;				//zakresy q-wartosci dla wykresow
+			this.mConfig.mPlotsMin = 0.0;					//zakresy q-wartosci dla wykresow
 			this.mConfig.mPlotsMax = 0.2;
 
-			this.mConfig.mSaveDataset = false;			//zapis zbiorów danych do plików
+			this.mConfig.mSaveDataset = false;				//zapis zbiorów danych do plików
 			this.mConfig.mSaveTrainDataset = false;
 
-            this.mConfig.mBoostIter = 5;                //liczba iteracji wyznaczenia zbioru przykładów pozytywnych na podstawie nowego score
-			this.mConfig.mOptimize = true;              //optymalizacja parametrow modelu SVM
-            this.mConfig.mOptimizeIter = 5;             //liczba iteracji optymalizacji (usrednienie wynikow)
-            this.mConfig.mCVFolds = 3;                  //liczba zbiorow walidacyjnych przy optymalizacji (jeśli 1 -> mOptimizeIter=1)
-            this.mConfig.mKernel = 2;                   //typ jadra SVM
-			
+            this.mConfig.mBoostIter = 5;                	//liczba iteracji wyznaczenia zbioru przykładów pozytywnych na podstawie nowego score
+			this.mConfig.mOptimize = true;              	//optymalizacja parametrow modelu SVM
+            this.mConfig.mOptimizeIter = 5;             	//liczba iteracji optymalizacji (usrednienie wynikow)
+            this.mConfig.mCVFolds = 3;                  	//liczba zbiorow walidacyjnych przy optymalizacji (jeśli 1 -> mOptimizeIter=1)
+            this.mConfig.mKernel = svm_parameter.LINEAR;    //typ jadra SVM
+
+			this.mConfig.mScoreConfig.getFragmentationConfig().setInstrument(this.mSample.getHeader().getInstrument());
+			this.mConfig.mScoreConfig.setFragmentMMD(this.mSample.getHeader().getFragmentMMD());
+			this.mConfig.mScoreConfig.setFragmentMMDUnit(this.mSample.getHeader().getFragmentMMDUnit());
+
 			/*
 			 * Uruchomienie watku obliczeniowego
 			 */
@@ -150,7 +159,7 @@ public class FdrSvmTest implements MScanWorkerListener
 						
 						//zliczanie przypisan o q-wartosci <= od progu
                         if (assignment.getDecoy()==FDRTools.IS_TARGET) {
-                            if (assignment.getQValue() < this.mConfig.mQValueThreshold)
+                            if (assignment.getQValue() <= this.mConfig.mQValueThreshold)
                                 qPos++;
                             for (int n = thresholds.length - 1; n >= 0; n--) {
                                 if (assignment.getQValue() < thresholds[n])
@@ -191,31 +200,77 @@ public class FdrSvmTest implements MScanWorkerListener
 	 * @return wyniki przeszukania bazodanowego
 	 */
 	public Sample readSample(String filename)
-	{	
-		Sample 				sample=null;
-		MsMsScanConfig		scanConfig=null;
-		
-		scanConfig=new MsMsScanConfig();
-		scanConfig.mReadSpectra=true;
-		
-		try
-		{
-			System.out.print("Reading file: " + filename + "... ");
-			MascotDatFileReader	fileReader=new MascotDatFileReader(filename,scanConfig);
-			fileReader.readFile();
-				
-			sample=new Sample("Test sample");			
-			sample.setQueries(fileReader.getQueries(),true);
-			sample.setHeader(fileReader.getHeader());
-			
-			System.out.println(sample.getQueries().length + " queries.");
-		}
+    {
+        Sample sample = null;
+        MsMsScanConfig scanConfig = null;
+
+        scanConfig = new MsMsScanConfig();
+        scanConfig.mReadSpectra = true;
+
+        try
+        {
+            System.out.print("Reading file: " + filename + "... ");
+            MascotDatFileReader fileReader = new MascotDatFileReader(filename, scanConfig);
+            fileReader.readFile();
+
+            sample = new Sample("Test sample");
+            sample.setQueries(fileReader.getQueries(), true);
+            sample.setHeader(fileReader.getHeader());
+
+            System.out.println(sample.getQueries().length + " queries.");
+
+            SampleTools.updateRtRange(sample);            //zakres czasu retencji
+
+            try                                            //czas retencji
+            {
+                RTPredictor predictor = new RTPredictor(RTPredictor.METHOD_KROKHIN3);
+
+                ArrayList<Double> rtList = new ArrayList<>();
+                ArrayList<Double> rtPredList = new ArrayList<>();
+
+                for (MsMsQuery query : sample.getQueries())
+                {
+                    if (query != null && query.isSignificant())
+                    {
+                        MsMsAssignment assignment = query.getAssignment();
+                        if (!assignment.isNA())
+                        {
+                            rtList.add(query.getRtInSec());
+                            rtPredList.add(predictor.getRt(assignment.getSequence()));
+                        }
+                    }
+                }
+
+                double rt[] = new double[rtList.size()];
+                double rtPred[] = new double[rtList.size()];
+                for (int i = 0; i < rtList.size(); i++)
+                {
+                    rt[i] = rtList.get(i);
+                    rtPred[i] = rtPredList.get(i);
+                }
+
+                LS ls = new LS();
+                double coeffs[] = ls.regress(rtPred, rt, true);
+
+                for (MsMsQuery query : sample.getQueries())
+                {
+                    if (query != null)
+                    {
+                        for (MsMsAssignment assignment : query.getAssignmentsList())
+                            if (!assignment.isNA())
+                                assignment.setCalcRtInSec(coeffs[0] * predictor.getRt(assignment.getSequence()) + coeffs[1]);
+                    }
+                }
+            }
+            catch (Exception e) {}
+        }
 		catch (MScanException mse)
 		{
 			System.out.println(mse.toString());
 		}
 		return(sample);
 	}
+
 
 	/**
 	 * Main
@@ -224,7 +279,9 @@ public class FdrSvmTest implements MScanWorkerListener
 	{
 		if (args!=null && args.length>0)
 			new FdrSvmTest(args[0]);
-		else
-			new FdrSvmTest(".//data//K_0_4_F060457.dat");
-	}
+        else
+            //new FdrSvmTest(".//data//70630_grzy_H_HAX_1.dat");	//z enzymem (semitypsyna)
+            //new FdrSvmTest(".//data//CA_A.dat");					//z enzymem (semitypsyna)
+            new FdrSvmTest(".//data//peptytdy_CA_A.dat");			//bez eznymu
+    }
 }

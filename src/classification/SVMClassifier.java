@@ -1,6 +1,5 @@
 package classification;
 
-import dataset.BasicInstance;
 import dataset.Dataset;
 import dataset.DatasetTools;
 import dataset.Instance;
@@ -105,7 +104,8 @@ public class SVMClassifier implements Classifier {
         DatasetResult results = new DatasetResult();
         Instance instance;
 
-        for(int k = 0; k < test.size(); k++){
+        for(int k = 0; k < test.size(); k++)
+        {
             instance = test.getInstance(k);
             results.add(classify(instance));
         }
@@ -114,7 +114,8 @@ public class SVMClassifier implements Classifier {
     }
 
     @Override
-    public InstanceResult classify(Instance instance) {
+    public InstanceResult classify(Instance instance)
+    {
         svm_node[] test_x = new svm_node[instance.numFeatures()];
         for (int i = 0; i < instance.numFeatures(); i++)
         {
@@ -135,12 +136,14 @@ public class SVMClassifier implements Classifier {
             label = svm.svm_predict_probability(model, test_x, val_prob);
             //for (int i = 0; i < totalClasses; i++)
             //    System.out.print("(" + labels[i] + ":" + val_prob[i] + ")");
-        } else {
-            val_prob = new double[1];
-            //double v = svm.svm_predict(model, test_x);
-            label = svm.svm_predict_values(model, test_x, val_prob);
-            //System.out.print("(value :" + val_prob[0] + ")");
         }
+        else
+            {
+                val_prob = new double[1];
+                //double v = svm.svm_predict(model, test_x);
+                label = svm.svm_predict_values(model, test_x, val_prob);
+                //System.out.print("(value :" + val_prob[0] + ")");
+            }
 
         //if(!instance.getClassValue().equals(label))
         //    System.out.println("ID:" + instance.getID() + " (Actual:" + instance.getClassValue() + " Prediction:" + label + ")");
@@ -148,16 +151,21 @@ public class SVMClassifier implements Classifier {
     }
 
     @Override
-    public void saveModel(String filename) throws IOException {
-        if (!transform.isEmpty()) {
+    public void saveModel(String filename) throws IOException
+    {
+        if (!transform.isEmpty())
+        {
             String transformName = ".//out//" + filename + "_transformation.txt";
             DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(transformName)));
-            for (Map.Entry<Integer, double[][]> entry : transform.entrySet()) {
+            for (Map.Entry<Integer, double[][]> entry : transform.entrySet())
+            {
                 Integer key = entry.getKey();
                 stream.writeBytes("transformation " + DatasetTools.transformTable[key] + "\n");
                 double[][] values = entry.getValue();
-                for (double[] value : values) {
-                    for (double aValue : value) {
+                for (double[] value : values)
+                {
+                    for (double aValue : value)
+                    {
                         stream.writeBytes(aValue + "\t");
                     }
                     stream.writeBytes("\n");
@@ -172,43 +180,52 @@ public class SVMClassifier implements Classifier {
     }
 
     @Override
-    public svm_model loadModel(String filename) throws IOException {
+    public svm_model loadModel(String filename) throws IOException
+    {
         System.out.println("\nLoading model parameters from file...");
         String modelName = ".//out//" + filename + "_model.txt";
         this.model = svm_load_model(modelName);
         this.param = model.param;
 
-        try {
+        try
+        {
             System.out.println("Loading information about data transformation from file...\n");
             String transformName = ".//out//" + filename + "_transformation.txt";
             Integer key = -1;
             double[][] values;
             BufferedReader reader  = new BufferedReader(new FileReader(transformName));
             String var3;
-            while ((var3 = reader.readLine()).startsWith("transformation")) {
+            while ((var3 = reader.readLine()).startsWith("transformation"))
+            {
                 String[] line = var3.trim().split(" ");
-                for(int i = 0; i < DatasetTools.transformTable.length; i++) {
-                    if (line[1].equals(DatasetTools.transformTable[i])) {
+                for(int i = 0; i < DatasetTools.transformTable.length; i++)
+                {
+                    if (line[1].equals(DatasetTools.transformTable[i]))
+                    {
                         key = i;
                         break;
                     }
                 }
                 ArrayList<ArrayList<String>> result = new ArrayList<>();
-                while (!(var3 = reader.readLine()).isEmpty()) {
+                while (!(var3 = reader.readLine()).isEmpty())
+                {
                     line = var3.trim().split("\\t");
                     ArrayList<String> record = new ArrayList<>();
                     Collections.addAll(record, line);
                     result.add(record);
                 }
                 values = new double[result.size()][result.get(0).size()];
-                for (int i = 0; i < result.size(); i++) {
+                for (int i = 0; i < result.size(); i++)
+                {
                     ArrayList<String> row = result.get(i);
                     for (int j = 0; j < row.size(); j++)
                         values[i][j] = Double.parseDouble(row.get(j));
                 }
                 transform.put(key, values);
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             System.err.println("No data transformation file for this model\n");
         }
 
@@ -242,7 +259,8 @@ public class SVMClassifier implements Classifier {
         param.kernel_type = kernel;
         param.gamma = gamma;
         param.C = cost;
-        if (weights != null) {
+        if (weights != null)
+        {
             param.nr_weight = weights.length;
             param.weight_label = weight_labels;
             param.weight = weights;
@@ -321,9 +339,12 @@ public class SVMClassifier implements Classifier {
         return transform;
     }
 
-    public void transform(Instance instance) {
-        if (!transform.isEmpty()) {
-            for (Map.Entry<Integer, double[][]> entry : transform.entrySet()) {
+    public void transform(Instance instance)
+    {
+        if (!transform.isEmpty())
+        {
+            for (Map.Entry<Integer, double[][]> entry : transform.entrySet())
+            {
                 Integer key = entry.getKey();
                 double[][] values = entry.getValue();
                 DatasetTools.dataTransformation(instance, key, values);
@@ -331,11 +352,13 @@ public class SVMClassifier implements Classifier {
         }
     }
 
-    public svm_parameter getSVMParameters() {
+    public svm_parameter getSVMParameters()
+    {
         return this.model.param;
     }
 
-    public svm_model getSVMModel() {
+    public svm_model getSVMModel()
+    {
         return this.model;
     }
 }
