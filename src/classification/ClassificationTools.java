@@ -5,13 +5,12 @@ import dataset.Dataset;
 public class ClassificationTools {
 
     /**
-     * Evaluates mean square error of classifying data set
-     * by the SVM model.
+     * Evaluates mean square error of classifying data set by some machine learning model.
      *
      * @param data
      *            classified data set
      * @param yPred
-     *            real values of class labels
+     *            predicted values of class labels
      *
      */
     public static double evaluateMSE(Dataset data, double[] yPred)
@@ -26,12 +25,12 @@ public class ClassificationTools {
     }
 
     /**
-     * Evaluates classification error of data set
+     * Evaluates classification error of data set.
      *
      * @param data
      *            classified data set
      * @param yPred
-     *            real values of class labels
+     *            predicted values of class labels
      *
      */
     public static double evaluateError(Dataset data, Object[] yPred)
@@ -39,7 +38,7 @@ public class ClassificationTools {
         double err = 0;
         Object y;
         for(int k = 0; k < data.size(); k++) {
-            y = data.getInstance(k).getClassValue();
+            y = Double.parseDouble(data.getInstance(k).getClassValue().toString());
             if (!yPred[k].equals(y)) err++;
         }
         return err/data.size();

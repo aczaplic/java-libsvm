@@ -21,39 +21,48 @@ public class SVMClassifier implements Classifier {
 
     private static final long serialVersionUID = 7293859346790783381L;
 
-    private svm_problem prob;
-    private svm_parameter param;
+    private svm_problem problem;
+    private svm_parameter parameters;
     private svm_model model;
-    private LinkedHashMap<Integer, double[][]> transform;
+    private LinkedHashMap<Integer, double[][]> transformations;
 
     /**
-     * Creates a new instance of SVMClassifier.
+     * Constructor of SVMClassifier. Initializes class attributes.
      */
     public SVMClassifier()
     {
-        param = new svm_parameter();
-        transform = new LinkedHashMap<>();
+        parameters = new svm_parameter();
+        transformations = new LinkedHashMap<>();
 
-        param.svm_type = svm_parameter.C_SVC;
-        param.kernel_type = svm_parameter.RBF;
-        param.degree = 3;
-        param.gamma = 0;	// 1/num_features
-        param.coef0 = 0;
-        param.nu = 0.5;
-        param.cache_size = 100;
-        param.C = 1;
-        param.eps = 1e-3;
-        param.p = 0.1;
-        param.shrinking = 1;
-        param.probability = 0;
-        param.nr_weight = 0;
-        param.weight_label = null;
-        param.weight = null;
+        parameters.svm_type = svm_parameter.C_SVC;
+        parameters.kernel_type = svm_parameter.RBF;
+        parameters.degree = 3;
+        parameters.gamma = 0;	// 1/num_features
+        parameters.coef0 = 0;
+        parameters.nu = 0.5;
+        parameters.cache_size = 100;
+        parameters.C = 1;
+        parameters.eps = 1e-3;
+        parameters.p = 0.1;
+        parameters.shrinking = 1;
+        parameters.probability = 0;
+        parameters.nr_weight = 0;
+        parameters.weight_label = null;
+        parameters.weight = null;
     }
 
+    /**
+     * Saves information about data transformation.
+     *
+     * @param transformation
+     *          number defining the methid of data transformation
+     * @param values
+     *          table of values needed to do the same transformation on the other part of data
+     *
+     */
     public void addDataTransformation(Integer transformation, double[][] values)
     {
-        transform.put(transformation, values);
+        transformations.put(transformation, values);
     }
 
     @Override
@@ -61,14 +70,14 @@ public class SVMClassifier implements Classifier {
         Collections.shuffle(data);
         defineSVMProblem(data);
         //setSVMParameters(svm_parameter.RBF, 10, 10);
-        model = svm.svm_train(prob, param);
+        model = svm.svm_train(problem, parameters);
     }
 
     /**
-     * Transforms dataset into instance of svm_problem class.
+     * Transforms dataset into instance of svm_problem (from libsvm library) class.
      *
      * @param train
-     *          dataset used for training model
+     *          data set used to build classifier
      *
      */
     public void defineSVMProblem(Dataset train)
@@ -76,24 +85,24 @@ public class SVMClassifier implements Classifier {
         int recordCount = train.size();
         int featureCount = train.numFeatures();
 
-        prob = new svm_problem();
-        prob.y = new double[recordCount];
-        prob.l = recordCount;
-        prob.x = new svm_node[recordCount][featureCount];
+        problem = new svm_problem();
+        problem.y = new double[recordCount];
+        problem.l = recordCount;
+        problem.x = new svm_node[recordCount][featureCount];
 
         for (int i = 0; i < recordCount; i++)
         {
             double[] features = train.getInstance(i).allFeaturesValues();
-            prob.x[i] = new svm_node[featureCount];
+            problem.x[i] = new svm_node[featureCount];
 
             for (int j = 0; j < features.length; j++)
             {
                 svm_node node = new svm_node();
                 node.index = j;
                 node.value = features[j];
-                prob.x[i][j] = node;
+                problem.x[i][j] = node;
             }
-            prob.y[i] = Double.parseDouble(train.getInstance(i).getClassValue().toString());
+            problem.y[i] = Double.parseDouble(train.getInstance(i).getClassValue().toString());
         }
     }
 
@@ -153,11 +162,11 @@ public class SVMClassifier implements Classifier {
     @Override
     public void saveModel(String filename) throws IOException
     {
-        if (!transform.isEmpty())
+        if (!transformations.isEmpty())
         {
             String transformName = ".//out//" + filename + "_transformation.txt";
             DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(transformName)));
-            for (Map.Entry<Integer, double[][]> entry : transform.entrySet())
+            for (Map.Entry<Integer, double[][]> entry : transformations.entrySet())
             {
                 Integer key = entry.getKey();
                 stream.writeBytes("transformation " + DatasetTools.transformTable[key] + "\n");
@@ -185,7 +194,7 @@ public class SVMClassifier implements Classifier {
         System.out.println("\nLoading model parameters from file...");
         String modelName = ".//out//" + filename + "_model.txt";
         this.model = svm_load_model(modelName);
-        this.param = model.param;
+        this.parameters = model.param;
 
         try
         {
@@ -221,7 +230,7 @@ public class SVMClassifier implements Classifier {
                     for (int j = 0; j < row.size(); j++)
                         values[i][j] = Double.parseDouble(row.get(j));
                 }
-                transform.put(key, values);
+                transformations.put(key, values);
             }
         }
         catch (IOException e)
@@ -240,9 +249,9 @@ public class SVMClassifier implements Classifier {
      * @param kernel
      *            type of kernel function
      * @param gamma
-     *            value of the parameter gamma in kernel function
+     *            value of the parameters gamma in kernel function
      * @param cost
-     *            value of the parameter C of C-SVC, epsilon-SVR, and nu-SVR
+     *            value of the parameters C of C-SVC, epsilon-SVR, and nu-SVR
      * @param weight_labels
      *            labels of classes meaning the order of weights
      * @param weights
@@ -251,29 +260,32 @@ public class SVMClassifier implements Classifier {
      *            tolerance of termination criterion
      * @param cache_size
      *            cache memory size in MB
+     * @param prob
+     *            whether to calculate probability of all classes or just output score from model
      *
      */
-    public void setSVMParameters(int type, int kernel, double gamma, double cost, int[] weight_labels, double[] weights, double eps, double cache_size, int prob)
+    public void setSVMParameters(int type, int kernel, double gamma, double cost, int[] weight_labels, double[] weights,
+                                 double eps, double cache_size, int prob)
     {
-        param.svm_type = type;
-        param.kernel_type = kernel;
-        param.gamma = gamma;
-        param.C = cost;
+        parameters.svm_type = type;
+        parameters.kernel_type = kernel;
+        parameters.gamma = gamma;
+        parameters.C = cost;
         if (weights != null)
         {
-            param.nr_weight = weights.length;
-            param.weight_label = weight_labels;
-            param.weight = weights;
+            parameters.nr_weight = weights.length;
+            parameters.weight_label = weight_labels;
+            parameters.weight = weights;
         }
-        param.cache_size = cache_size; //default 100MB
-        param.eps = eps; // default 0.001
-        param.probability = prob;
+        parameters.cache_size = cache_size; //default 100MB
+        parameters.eps = eps; // default 0.001
+        parameters.probability = prob;
 
         if (model != null)
-            model.param = param;
+            model.param = parameters;
 
         System.out.println("\nSVM params:");
-        printFields(param);
+        printFields(parameters);
     }
 
     /**
@@ -282,9 +294,9 @@ public class SVMClassifier implements Classifier {
      * @param kernel
      *            type of kernel function
      * @param gamma
-     *            value of the parameter gamma in kernel function
+     *            value of the parameters gamma in kernel function
      * @param cost
-     *            value of the parameter C of C-SVC, epsilon-SVR, and nu-SVR
+     *            value of the parameters C of C-SVC, epsilon-SVR, and nu-SVR
      *
      */
     public void setSVMParameters(int kernel, double gamma, double cost)
@@ -298,13 +310,15 @@ public class SVMClassifier implements Classifier {
      * @param kernel
      *            type of kernel function
      * @param gamma
-     *            value of the parameter gamma in kernel function
+     *            value of the parameters gamma in kernel function
      * @param cost
-     *            value of the parameter C of C-SVC, epsilon-SVR, and nu-SVR
+     *            value of the parameters C of C-SVC, epsilon-SVR, and nu-SVR
      * @param weight_labels
      *            labels of classes meaning the order of weights
      * @param weights
      *            values of individual weights of cost for each class
+     * @param prob
+     *            whether to calculate probability of all classes or just output score from model
      *
      */
     public void setSVMParameters(int kernel, double gamma, double cost, int[] weight_labels, double[] weights, int prob)
@@ -313,13 +327,13 @@ public class SVMClassifier implements Classifier {
     }
 
     /**
-     * Prints all fields of object
+     * Prints all fields of object.
      *
      * @param o
      *          object to print
      *
      */
-    public static void printFields(Object o)
+    private static void printFields(Object o)
     {
         if (o!=null)
         {
@@ -335,28 +349,53 @@ public class SVMClassifier implements Classifier {
         }
     }
 
-    public LinkedHashMap<Integer, double[][]> getTransform() {
-        return transform;
+    /**
+     * Getter of information about all data transformations.
+     *
+     * @return map with transformations methods and values needed to restore/repeat transformation
+     *
+     **/
+    public LinkedHashMap<Integer, double[][]> getTransformations() {
+        return transformations;
     }
 
+    /**
+     * Transforms new instance of data set using the same methods which where earlier used on the whole data set.
+     *
+     * @param instance
+     *          new instance to be transformed
+     *
+     **/
     public void transform(Instance instance)
     {
-        if (!transform.isEmpty())
+        if (!transformations.isEmpty())
         {
-            for (Map.Entry<Integer, double[][]> entry : transform.entrySet())
+            for (Map.Entry<Integer, double[][]> entry : transformations.entrySet())
             {
                 Integer key = entry.getKey();
                 double[][] values = entry.getValue();
-                DatasetTools.dataTransformation(instance, key, values);
+                DatasetTools.transformData(instance, key, values);
             }
         }
     }
 
+    /**
+     * Getter of models parameters.
+     *
+     * @return parameters of SVM model
+     *
+     **/
     public svm_parameter getSVMParameters()
     {
         return this.model.param;
     }
 
+    /**
+     * Getter of SVM model.
+     *
+     * @return model
+     *
+     **/
     public svm_model getSVMModel()
     {
         return this.model;

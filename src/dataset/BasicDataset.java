@@ -7,6 +7,7 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
     private static final long serialVersionUID = -879896157683879525L;
 
     private TreeSet<Object> classes = new TreeSet<>();
+    private ArrayList<String> featuresNames = new ArrayList<>();
 
     /**
      * Creates an empty data set.
@@ -28,8 +29,21 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
 
     /**
      *
-     * Checks if instance has the same number of features
-     * as all instances in data set before adding.
+     * Creates a data set that contains the provided instances of data and keeps the names of all features.
+     *
+     * @param featuresNames
+     *            names of all features
+     * @param coll
+     *            collection with instances
+     */
+    public BasicDataset(Collection<Instance> coll, ArrayList<String> featuresNames) {
+        this.featuresNames = featuresNames;
+        this.addAll(coll);
+    }
+
+    /**
+     *
+     * Checks if instance has the same number of features as all instances in data set before adding.
      *
      * @param inst
      *            instance to check
@@ -40,17 +54,41 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
 
     /**
      *
-     * Checks if all instances have the same number of features,
-     * so can be added to one data set.
+     * Checks if all instances have the same number of features and if this number is equal to number of features
+     * in data set before, so can be added to this data set.
      *
      * @param c
      *            collection with instances
      */
     private boolean check(Collection<? extends Instance> c) {
         Set<Integer> numFeatures = new TreeSet<>();
+        if (this.size() > 0) numFeatures.add(this.numFeatures());
         for (Instance i : c)
             numFeatures.add(i.numFeatures());
         return numFeatures.size() == 1;
+    }
+
+    /**
+     * Getter of the list with names of features in data set.
+     *
+     * @return a list of the features names
+     *
+     */
+    public ArrayList<String> getFeaturesNames(){
+        return this.featuresNames;
+    }
+
+    /**
+     * Setter of the list with names of features in data set.
+     *
+     * @param featuresNames
+     *            a list of the features names
+     *
+     */
+    public void setFeaturesNames(ArrayList<String> featuresNames){
+        if (featuresNames.size() == this.numFeatures())
+            this.featuresNames = featuresNames;
+        this.featuresNames = new ArrayList<>();
     }
 
     @Override
@@ -97,7 +135,9 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
     public int numFeatures() {
         if (this.size() == 0)
             return 0;
-        return get(0).numFeatures();
+        if (this.featuresNames.size() != 0)
+            return this.featuresNames.size();
+        return this.getInstance(0).numFeatures();
     }
 
     @Override

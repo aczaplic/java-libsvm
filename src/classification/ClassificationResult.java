@@ -10,18 +10,16 @@ public interface ClassificationResult {
     public Object getLabel();
 
     /**
-     * Returns evaluated score for one instance
-     * using created classifier.
+     * Returns output value for one instance calculated by some classifier.
      *
      * @return predicted score
      */
     public double getValue();
 
     /**
-     * Returns evaluated probability of classes for
-     * instance using created classifier.
+     * Returns probability of all classes for one instance calculated by some classifier.
      *
-     * @return array of probability of classes
+     * @return array of probability of all classes
      */
     public double[] getProbability();
 }

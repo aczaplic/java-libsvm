@@ -6,6 +6,16 @@ public class InstanceResult implements ClassificationResult {
     private double value;
     private double[] probability;
 
+    /**
+     * Constructor of InstanceResult with provided values of class attributes.
+     *
+     * @param label
+     *            value of class label for instance
+     * @param value
+     *            output value from machine learing model
+     * @param probability
+     *            probability of each class calculated by machine learning model
+     */
     public InstanceResult(Object label, double[] value, double[] probability) {
         this.label = label;
         this.value = value[0];
@@ -13,8 +23,7 @@ public class InstanceResult implements ClassificationResult {
     }
 
     /**
-     * Creates new instance of result class for one instance
-     * from data sets, saving results of classification.
+     * Creates new instance of result class for one instance in dataset, saving results of classification.
      *
      * @param label
      *            value of class label for instance
@@ -24,7 +33,7 @@ public class InstanceResult implements ClassificationResult {
      * @param probability
      *            flag of probability parameter in SVM model
      *
-     * @return new instance of Instanceresult class
+     * @return new instance of InstanceResult class
      */
     public static InstanceResult createInstanceResult(Object label, double[] val_prob, int probability) {
         if (probability == 0)
@@ -48,6 +57,15 @@ public class InstanceResult implements ClassificationResult {
         return probability;
     }
 
+    /**
+     * Returns output value or probability of provided class for one instance calculated by some classifier
+     * depending on configuration of model during building (which score have been calculated).
+     *
+     * @param classIndex
+     *          index of class
+     *
+     * @return value or probability for one class
+     */
     public double getScore(int classIndex) {
         if (probability == null)
             return value;

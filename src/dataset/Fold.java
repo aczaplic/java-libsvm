@@ -8,13 +8,12 @@ public class Fold implements Dataset {
 
     /**
      *
-     * Creates one fold of data set that contains the instances of data
-     * with the provided indices.
+     * Constructor of Fold class. Creates one fold of data set that contains the instances with the provided indices.
      *
      * @param indices
      *            provided indices of data which are ascribed to this fold
      * @param parent
-     *            data set divided into folds
+     *            data set to be divided into folds
      *
      */
     public Fold(Dataset parent, int[] indices) {
@@ -254,6 +253,7 @@ public class Fold implements Dataset {
 
     @Override
     public Dataset[] folds(int numFolds, Random rg, boolean stratified) {
+        // TODO implement
         throw new UnsupportedOperationException("Forbidden operation for a fold of a data set.");
     }
 

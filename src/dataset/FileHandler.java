@@ -8,7 +8,7 @@ import java.util.Scanner;
 public class FileHandler {
 
     /**
-     * Reads file line after line (separated by tabulator) to ArrayList
+     * Reads file line after line (separated by tabulator) to ArrayList.
      *
      * @return ArrayList with file content
      */

@@ -8,7 +8,7 @@ public class BasicInstance extends AbstractInstance implements Instance{
     private double[] features;
 
     /**
-     * Creates a new instance with the provide values of the features. The
+     * Constructor of BasicInstance class. Creates a new instance with the provide values of the features. The
      * class label will be set to null.
      *
      * @param values
@@ -19,7 +19,7 @@ public class BasicInstance extends AbstractInstance implements Instance{
     }
 
     /**
-     * Creates a new instance with the provided values of features and the
+     * Constructor of BasicInstance class. Creates a new instance with the provided values of features and the
      * provided class label.
      *
      * @param values
@@ -33,7 +33,7 @@ public class BasicInstance extends AbstractInstance implements Instance{
     }
 
     /**
-     * Creates a new instance with the provided name, values of features,
+     * Constructor of BasicInstance class. Creates a new instance with the provided name, values of features,
      * and class label.
      *
      * @param name
@@ -49,8 +49,7 @@ public class BasicInstance extends AbstractInstance implements Instance{
     }
 
     /* Hide argumentless constructor */
-    private BasicInstance() {
-    }
+    private BasicInstance() {}
 
     @Override
     public int numFeatures() {

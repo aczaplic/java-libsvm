@@ -4,6 +4,11 @@ import java.util.ArrayList;
 
 public class DatasetResult extends ArrayList<InstanceResult> {
 
+    /**
+     * Returns predicted labels for all instances in test set.
+     *
+     * @return array of predicted labels
+     */
     public Object[] getLabels() {
         Object[] labels = new Object[this.size()];
         for (int i=0; i<this.size(); i++)
@@ -11,6 +16,11 @@ public class DatasetResult extends ArrayList<InstanceResult> {
         return labels;
     }
 
+    /**
+     * Returns output values from model for all instances in test set.
+     *
+     * @return array of values
+     */
     public double[] getValues() {
         double[] values = new double[this.size()];
         for (int i=0; i<this.size(); i++)
@@ -18,19 +28,33 @@ public class DatasetResult extends ArrayList<InstanceResult> {
         return values;
     }
 
-    public double[][] getProbability() {
+    /**
+     * Returns evaluated probability of all classes for all instances in test set.
+     *
+     * @return table of probability values (row - class, column - instance)
+     */
+    public double[][] getProbabilities() {
         int numClasses = this.get(0).getProbability().length;
-        double[][] probability = new double[numClasses][this.size()];
+        double[][] probabilities = new double[numClasses][this.size()];
         double[] inst;
         for (int i=0; i<this.size(); i++) {
             inst = this.get(i).getProbability();
             for (int n=0; n<numClasses; n++) {
-                probability[n][i] = inst[n];
+                probabilities[n][i] = inst[n];
             }
         }
-        return probability;
+        return probabilities;
     }
 
+    /**
+     * Returns output values or probability of provided class for all instances in test set calculated by some
+     * classifier depending on configuration of model during building (which score have been calculated).
+     *
+     * @param classIndex
+     *          index of class
+     *
+     * @return array of values or probabilities for one class
+     */
     public double[] getScores(int classIndex) {
         double[] scores = new double[this.size()];
         for (int i=0; i<this.size(); i++)

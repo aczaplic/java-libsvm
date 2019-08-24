@@ -41,25 +41,28 @@ public class FdrSvmTest implements MScanWorkerListener
 			 * 	Utworzenie konfiguracji
 			 */
 			this.mConfig=new FdrSvmConfig();
-			this.mConfig.mComputeSVM = true;				//liczenie q-wartosci na podstawie score SVM
-			this.mConfig.mQValueThreshold = 0.2;			//prog q-wartosci dla zbioru treningowego
-            this.mConfig.mQValueOptimization = 0.05;    	//prog q-wartosci do optymalizacji parametrow
+			this.mConfig.setmComputeSVM(true);				//liczenie q-wartosci na podstawie score SVM
+			this.mConfig.setmQValueThreshold(0.2);			//prog q-wartosci dla zbioru treningowego
+            this.mConfig.setmQValueOptimization(0.05);    	//prog q-wartosci do optymalizacji parametrow
 			
 			this.mConfig.mPlotsMin = 0.0;					//zakresy q-wartosci dla wykresow
 			this.mConfig.mPlotsMax = 0.2;
 
-			this.mConfig.mSaveDataset = false;				//zapis zbiorów danych do plików
-			this.mConfig.mSaveTrainDataset = false;
+			this.mConfig.setmSaveDataset(false);			//zapis zbiorów danych do plików
+			this.mConfig.setmSaveTrainDataset(false);
 
-            this.mConfig.mBoostIter = 5;                	//liczba iteracji wyznaczenia zbioru przykładów pozytywnych na podstawie nowego score
-			this.mConfig.mOptimize = true;              	//optymalizacja parametrow modelu SVM
-            this.mConfig.mOptimizeIter = 5;             	//liczba iteracji optymalizacji (usrednienie wynikow)
-            this.mConfig.mCVFolds = 3;                  	//liczba zbiorow walidacyjnych przy optymalizacji (jeśli 1 -> mOptimizeIter=1)
-            this.mConfig.mKernel = svm_parameter.LINEAR;    //typ jadra SVM
+            this.mConfig.setmBoostIter(3);                	//liczba iteracji wyznaczenia zbioru przykładów pozytywnych na podstawie nowego score
+			this.mConfig.setmOptimize(true);              	//optymalizacja parametrow modelu SVM
+            this.mConfig.setmOptimizeIter(1);             	//liczba iteracji optymalizacji (usrednienie wynikow)
+            this.mConfig.setmCVFolds(3);                  	//liczba zbiorow walidacyjnych przy optymalizacji (jeśli 1 -> mOptimizeIter=1)
+            this.mConfig.setmKernel(svm_parameter.RBF);     //typ jadra SVM
 
-			this.mConfig.mScoreConfig.getFragmentationConfig().setInstrument(this.mSample.getHeader().getInstrument());
-			this.mConfig.mScoreConfig.setFragmentMMD(this.mSample.getHeader().getFragmentMMD());
-			this.mConfig.mScoreConfig.setFragmentMMDUnit(this.mSample.getHeader().getFragmentMMDUnit());
+			this.mConfig.setmC(new double[]{0.1, 1, 10});
+			this.mConfig.setmCneg_pos(new double[]{1, 3, 10});
+
+			this.mConfig.getmScoreConfig().getFragmentationConfig().setInstrument(this.mSample.getHeader().getInstrument());
+			this.mConfig.getmScoreConfig().setFragmentMMD(this.mSample.getHeader().getFragmentMMD());
+			this.mConfig.getmScoreConfig().setFragmentMMDUnit(this.mSample.getHeader().getFragmentMMDUnit());
 
 			/*
 			 * Uruchomienie watku obliczeniowego
@@ -80,7 +83,7 @@ public class FdrSvmTest implements MScanWorkerListener
 		 * 	Wykresy q-wartosci
 		 */
 		FDRTools.plotNumber(((FdrSvmWorker)worker).getQValues(),((FdrSvmWorker)worker).getConfig());
-		if (this.mConfig.mComputeSVM)
+		if (this.mConfig.ismComputeSVM())
 			FDRTools.plotNumber(((FdrSvmWorker)worker).getQValuesSVM(),((FdrSvmWorker)worker).getConfig());
 		
 		/*
@@ -159,7 +162,7 @@ public class FdrSvmTest implements MScanWorkerListener
 						
 						//zliczanie przypisan o q-wartosci <= od progu
                         if (assignment.getDecoy()==FDRTools.IS_TARGET) {
-                            if (assignment.getQValue() <= this.mConfig.mQValueThreshold)
+                            if (assignment.getQValue() <= this.mConfig.getmQValueThreshold())
                                 qPos++;
                             for (int n = thresholds.length - 1; n >= 0; n--) {
                                 if (assignment.getQValue() < thresholds[n])
@@ -179,7 +182,7 @@ public class FdrSvmTest implements MScanWorkerListener
 		System.setOut(consoleStream);
 		
 		System.out.println("\nAFTER POST-PROCESSING\nQueries with q-values <");
-		System.out.println(this.mConfig.mQValueThreshold + "(user defined threshold): " + qPos);
+		System.out.println(this.mConfig.getmQValueThreshold() + "(user defined threshold): " + qPos);
         for (int n=0; n<thresholds.length; n++)
             System.out.println(thresholds[n] + ": " + nrPositive[n]);
 		System.out.println("Done");
@@ -202,9 +205,7 @@ public class FdrSvmTest implements MScanWorkerListener
 	public Sample readSample(String filename)
     {
         Sample sample = null;
-        MsMsScanConfig scanConfig = null;
-
-        scanConfig = new MsMsScanConfig();
+        MsMsScanConfig scanConfig = new MsMsScanConfig();
         scanConfig.mReadSpectra = true;
 
         try
