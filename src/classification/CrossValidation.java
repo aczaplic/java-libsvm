@@ -66,7 +66,7 @@ public class CrossValidation {
     }
 
     /**
-     * Performs cross validation with the specified parameters without equal division of classes.
+     * Performs cross validation with the specified parameters without equal division of getClasses.
      *
      * @param data
      *            the data set to use in the cross validation. This data set is being split in the defined
@@ -83,7 +83,7 @@ public class CrossValidation {
     }
 
     /**
-     * Performs cross validation with the specified parameters without equal division of classes and random generator
+     * Performs cross validation with the specified parameters without equal division of getClasses and random generator
      * with seed set to current time.
      *
      * @param data

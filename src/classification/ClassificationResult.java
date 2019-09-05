@@ -17,9 +17,9 @@ public interface ClassificationResult {
     public double getValue();
 
     /**
-     * Returns probability of all classes for one instance calculated by some classifier.
+     * Returns probability of all getClasses for one instance calculated by some classifier.
      *
-     * @return array of probability of all classes
+     * @return array of probability of all getClasses
      */
     public double[] getProbability();
 }

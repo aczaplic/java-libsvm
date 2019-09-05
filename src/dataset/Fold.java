@@ -22,8 +22,8 @@ public class Fold implements Dataset {
     }
 
     @Override
-    public SortedSet<Object> classes() {
-        return parent.classes();
+    public SortedSet<Object> getClasses() {
+        return parent.getClasses();
     }
 
     @Override
@@ -242,18 +242,17 @@ public class Fold implements Dataset {
     }
 
     @Override
-    public int classIndex(Instance instance) {
-        return parent.classIndex(instance);
+    public int getClassIndex(Instance instance) {
+        return parent.getClassIndex(instance);
     }
 
     @Override
-    public Object classValue(int index) {
-        return parent.classValue(index);
+    public Object getClassValue(int index) {
+        return parent.getClassValue(index);
     }
 
     @Override
     public Dataset[] folds(int numFolds, Random rg, boolean stratified) {
-        // TODO implement
         throw new UnsupportedOperationException("Forbidden operation for a fold of a data set.");
     }
 

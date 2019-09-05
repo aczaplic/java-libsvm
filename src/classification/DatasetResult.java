@@ -29,7 +29,7 @@ public class DatasetResult extends ArrayList<InstanceResult> {
     }
 
     /**
-     * Returns evaluated probability of all classes for all instances in test set.
+     * Returns evaluated probability of all getClasses for all instances in test set.
      *
      * @return table of probability values (row - class, column - instance)
      */

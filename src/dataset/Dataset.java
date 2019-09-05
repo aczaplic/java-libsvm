@@ -6,12 +6,12 @@ import java.util.SortedSet;
 
 public interface Dataset extends List<Instance> {
     /**
-     * Returns a set containing all different classes in this data set. If no classes are available, this will return
+     * Returns a set containing all different getClasses in this data set. If no getClasses are available, this will return
      * the empty set.
      *
-     * @return sorted set of classes
+     * @return sorted set of getClasses
      */
-    public SortedSet<Object> classes();
+    public SortedSet<Object> getClasses();
 
     /**
      * Add an instance to this data set. The compatibility of the new item with the items in the data set should be
@@ -64,7 +64,7 @@ public interface Dataset extends List<Instance> {
      * @return the index of the class value of the supplied instance
      *
      */
-    public int classIndex(Instance instance);
+    public int getClassIndex(Instance instance);
 
     /**
      * Returns the class value of the supplied class index.
@@ -75,7 +75,7 @@ public interface Dataset extends List<Instance> {
      * @return the class value of the instance with a certain index
      *
      */
-    public Object classValue(int index);
+    public Object getClassValue(int index);
 
     /**
      * Create a number of folds from the data set and return them. The supplied random generator is used to determine

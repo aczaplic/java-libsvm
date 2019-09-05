@@ -113,7 +113,7 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
     }
 
     @Override
-    public SortedSet<Object> classes() {
+    public SortedSet<Object> getClasses() {
         return classes;
     }
 
@@ -141,16 +141,16 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
     }
 
     @Override
-    public int classIndex(Instance inst) {
+    public int getClassIndex(Instance inst) {
         if (inst.getClassValue() != null)
-            return this.classes().headSet(inst.getClassValue()).size();
+            return this.getClasses().headSet(inst.getClassValue()).size();
         else
             return -1;
     }
 
     @Override
-    public Object classValue(int index) {
-        return this.classes().toArray()[index];
+    public Object getClassValue(int index) {
+        return this.getClasses().toArray()[index];
     }
 
     @Override
@@ -163,7 +163,7 @@ public class BasicDataset extends ArrayList<Instance> implements Dataset {
         if (stratified) {
             int ind;
             for (int i = 0; i < this.size(); i++) {
-                ind = classIndex(this.getInstance(i));
+                ind = getClassIndex(this.getInstance(i));
                 indices.get(ind).add(i);
             }
         }

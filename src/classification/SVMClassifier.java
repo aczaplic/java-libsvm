@@ -13,8 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static classification.InstanceResult.createInstanceResult;
-import static libsvm.svm.svm_load_model;
-import static libsvm.svm.svm_save_model;
 
 
 public class SVMClassifier implements Classifier {
@@ -67,9 +65,7 @@ public class SVMClassifier implements Classifier {
 
     @Override
     public void buildClassifier(Dataset data) {
-        Collections.shuffle(data);
         defineSVMProblem(data);
-        //setSVMParameters(svm_parameter.RBF, 10, 10);
         model = svm.svm_train(problem, parameters);
     }
 
@@ -185,7 +181,7 @@ public class SVMClassifier implements Classifier {
         }
 
         String modelName = ".//out//" + filename + "_model.txt";
-        svm_save_model(modelName, this.model);
+        svm.svm_save_model(modelName, this.model);
     }
 
     @Override
@@ -193,7 +189,7 @@ public class SVMClassifier implements Classifier {
     {
         System.out.println("\nLoading model parameters from file...");
         String modelName = ".//out//" + filename + "_model.txt";
-        this.model = svm_load_model(modelName);
+        this.model = svm.svm_load_model(modelName);
         this.parameters = model.param;
 
         try
@@ -253,7 +249,7 @@ public class SVMClassifier implements Classifier {
      * @param cost
      *            value of the parameters C of C-SVC, epsilon-SVR, and nu-SVR
      * @param weight_labels
-     *            labels of classes meaning the order of weights
+     *            labels of getClasses meaning the order of weights
      * @param weights
      *            values of individual weights of cost for each class
      * @param eps
@@ -261,7 +257,7 @@ public class SVMClassifier implements Classifier {
      * @param cache_size
      *            cache memory size in MB
      * @param prob
-     *            whether to calculate probability of all classes or just output score from model
+     *            whether to calculate probability of all getClasses or just output score from model
      *
      */
     public void setSVMParameters(int type, int kernel, double gamma, double cost, int[] weight_labels, double[] weights,
@@ -284,8 +280,8 @@ public class SVMClassifier implements Classifier {
         if (model != null)
             model.param = parameters;
 
-        System.out.println("\nSVM params:");
-        printFields(parameters);
+        //System.out.println("\nSVM params:");
+        //printFields(parameters);
     }
 
     /**
@@ -314,11 +310,11 @@ public class SVMClassifier implements Classifier {
      * @param cost
      *            value of the parameters C of C-SVC, epsilon-SVR, and nu-SVR
      * @param weight_labels
-     *            labels of classes meaning the order of weights
+     *            labels of getClasses meaning the order of weights
      * @param weights
      *            values of individual weights of cost for each class
      * @param prob
-     *            whether to calculate probability of all classes or just output score from model
+     *            whether to calculate probability of all getClasses or just output score from model
      *
      */
     public void setSVMParameters(int kernel, double gamma, double cost, int[] weight_labels, double[] weights, int prob)

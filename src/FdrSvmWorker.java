@@ -1,4 +1,7 @@
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 
 import classification.*;
@@ -73,7 +76,7 @@ public final class FdrSvmWorker extends MScanWorker
 	public Object construct()
 	{
 		this.mQValues = new ArrayList<double[][]>(this.mSamples.length);
-		this.mQValuesSVM = new ArrayList<double[][]>(this.mSamples.length*this.mConfig.getmBoostIter());
+		this.mQValuesSVM = new ArrayList<double[][]>(this.mSamples.length);
 
         for (Sample mSample : this.mSamples)
             this.computeQValues(mSample);
@@ -184,8 +187,11 @@ public final class FdrSvmWorker extends MScanWorker
      */
     private void selfBoostingSVM(Sample sample, MsMsQuery queries[])
     {
+        double qValuesSVM[][] = new double[0][];
         for (int iter = 0; iter<this.mConfig.getmBoostIter(); iter++)
         {
+            System.out.println("-----------------------------------------------------------------------");
+            System.out.println("Boosting iteration : " + (iter+1) + "/" + this.mConfig.getmBoostIter());
             //podział wszystkich queries w próbce na fold'y
             int numFolds = this.mConfig.getmCVFolds();
             int[][] indOfQueries = new int[numFolds][];
@@ -209,7 +215,9 @@ public final class FdrSvmWorker extends MScanWorker
                 }
 
                 //liczenie score dla każdego fold'u
-                double foldScores[] = this.computeSvmScores(sample, classifyingQueries, trainQueries, iter);
+                System.out.println("-----------------------------------------------------------------------");
+                System.out.println("Model number: " + (n+1));
+                double foldScores[] = this.computeSvmScores(sample, classifyingQueries, trainQueries, iter, n);
                 Scores[n] = foldScores;
             }
 
@@ -279,14 +287,14 @@ public final class FdrSvmWorker extends MScanWorker
             }
 
             //liczenie q-wartosci na podstawie score SVM
-            double qValuesSVM[][] = FDRTools.computeQValues(queries,SVMScores,this.mConfig,this,0);
+            qValuesSVM = FDRTools.computeQValues(queries,SVMScores,this.mConfig,this,0);
             //System.out.println(Arrays.toString(qValuesSVM[FDRTools.ROW_QVALUE]));
 
             //przypisanie q-wartosci do próbki białkowej i zapamietanie ich w systemie
             FDRTools.setQValues(sample,qValuesSVM);
-            this.mQValuesSVM.add(qValuesSVM);
+            //this.mQValuesSVM.add(qValuesSVM);
         }
-        //this.mQValuesSVM.add(qValuesSVM); ????
+        this.mQValuesSVM.add(qValuesSVM);
     }
 
     /**
@@ -306,7 +314,7 @@ public final class FdrSvmWorker extends MScanWorker
         }
         nrOfAssignments.remove(nrOfAssignments.size()-1);
 
-        Random rg = new Random(System.currentTimeMillis());
+        Random rg = new Random(111);
         int numFolds = this.mConfig.getmCVFolds();
         int maxFoldSize = (int) Math.ceil((double)queriesVector.size()/numFolds);
         MsMsQuery[][] queriesFolds = new MsMsQuery[numFolds][maxFoldSize];
@@ -338,7 +346,7 @@ public final class FdrSvmWorker extends MScanWorker
 	 * @param buildingQueries
 	 * @return
 	 */
-	private double[] computeSvmScores(Sample sample, MsMsQuery classifyingQueries[], MsMsQuery buildingQueries[], int iteration)
+	private double[] computeSvmScores(Sample sample, MsMsQuery classifyingQueries[], MsMsQuery buildingQueries[], int iteration, int fold_number)
 	{
 		/*
 		 *  Budowanie modelu
@@ -348,7 +356,7 @@ public final class FdrSvmWorker extends MScanWorker
         Vector<MsMsQuery> tQueries = new Vector<>();
 		BasicDataset trainDataset = this.createTrainDataset(sample, buildingQueries, tQueries);
         if (this.mConfig.ismSaveTrainDataset()) {
-            String filename = ".//data//train_data_" + this.mConfig.getmQValueThreshold() + "_iter_" + (iteration+1) + ".txt";
+            String filename = ".//out//train_data_iter_" + (iteration+1) + "_fold_" + (fold_number+1) + ".txt";
             try {
                 DatasetTools.saveData(filename, trainDataset);
             } catch (FileNotFoundException e) {
@@ -368,7 +376,7 @@ public final class FdrSvmWorker extends MScanWorker
             this.mConfig.setmOptimize(false);
         if (this.mConfig.ismOptimize())
         {
-            int maxAt = optimParameters(trainDataset, trainQueries, min_max);
+            int maxAt = optimParameters(trainDataset, trainQueries, min_max, fold_number);
             double[] gammaOptim;
             if (this.mConfig.getmKernel() == 1)
                 gammaOptim = new double[]{1};
@@ -454,11 +462,12 @@ public final class FdrSvmWorker extends MScanWorker
 		System.out.println(sum_pos + " / " + scores.length);
         System.out.println("error: " + err + "\n");
 
-		if (this.mConfig.ismSaveDataset() && iteration == 1)
+		if (this.mConfig.ismSaveDataset() && iteration == 0)
         {
             try {
-                DatasetTools.saveData(".//data//classify_data_\" + this.mConfig.getmQValueThreshold() + \".txt", classifyDataset);
-            } catch (FileNotFoundException e) {
+                DatasetTools.saveData(".//out//classify_data_iter_" + (iteration+1) + "_fold_" + (fold_number+1) + ".txt", classifyDataset);
+                svm.saveModel("classify_iter_" + (iteration+1) + "_fold_" + (fold_number+1));
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -521,7 +530,7 @@ public final class FdrSvmWorker extends MScanWorker
      * @param min_max
      * @return
      */
-	private int optimParameters(Dataset trainDataset, MsMsQuery[] trainQueries, double[][] min_max)
+	private int optimParameters(Dataset trainDataset, MsMsQuery[] trainQueries, double[][] min_max, int fold_number)
     {
         double[] gammaOptim;
         if (this.mConfig.getmKernel() == 0)
@@ -539,6 +548,10 @@ public final class FdrSvmWorker extends MScanWorker
                 {
                     for (double Cneg_pos : this.mConfig.getmCneg_pos())
                     {
+                        if (this.mConfig.getmKernel() == 2)
+                            System.out.println("\nSVM parameters: gamma = " + gamma + ", C = " + C + ", Cneg_pos = " + Cneg_pos);
+                        else
+                            System.out.println("\nSVM parameters: C = " + C + ", Cneg_pos = " + Cneg_pos);
                         List<Classifier> models = new ArrayList<>();
                         for (int i = 0; i < this.mConfig.getmCVFolds(); i++)
                         {
@@ -560,6 +573,34 @@ public final class FdrSvmWorker extends MScanWorker
                             if (qValuesSVM[3][i] < this.mConfig.getmQValueOptimization() && qValuesSVM[4][i] == FDRTools.IS_TARGET)
                                 numPos[n]++;
 
+
+//                        // TODO -------------- na rzecz testow
+//                        {
+//                            PrintStream consoleStream = System.out;
+//                            String filename = ".//out//model_" + (fold_number + 1) + "//table_q_values_gamma_ " + gamma + "_C_" + C + "_Cneg_pos_" + Cneg_pos + "_iter_CV_" + iter + ".txt";
+//                            PrintStream fileStream = null;
+//                            try {
+//                                fileStream = new PrintStream(new File(filename));
+//                            } catch (FileNotFoundException e) {
+//                                e.printStackTrace();
+//                            }
+//                            System.setOut(fileStream);
+//                            String[] names = {"Sample", "Query", "Assignment", "q-value", "decoy", "score"};
+//                            StringBuilder str;
+//                            int nr = 0;
+//                            for (double[] qValue_row : qValuesSVM) {
+//                                str = new StringBuilder();
+//                                str.append(names[nr]);
+//                                for (double value : qValue_row) {
+//                                    str.append(value);
+//                                    str.append("\t");
+//                                }
+//                                System.out.println(str);
+//                                nr++;
+//                            }
+//                            System.setOut(consoleStream);
+//                        }
+
                         n++;
                     }
                 }
@@ -569,6 +610,21 @@ public final class FdrSvmWorker extends MScanWorker
         {
             numPos[i] /= this.mConfig.getmOptimizeIter();
         }
+
+//        // TODO -------------- na rzecz testow
+//        {
+//            PrintStream consoleStream = System.out;
+//            String filename = ".//out//model_" + (fold_number + 1) + "//num_pos_q" + this.mConfig.getmQValueOptimization() + ".txt";
+//            PrintStream fileStream = null;
+//            try {
+//                fileStream = new PrintStream(new File(filename));
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            }
+//            System.setOut(fileStream);
+//            System.out.println(Arrays.toString(numPos));
+//            System.setOut(consoleStream);
+//        }
 
         //Wybor najlepszej kombinacji wartosci parametrow pog wzgledem liczby prawidlowych identyfikacji ponizej zadanego progu q-wartosci
         int maxAt = 0;

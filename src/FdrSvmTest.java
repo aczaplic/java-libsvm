@@ -53,12 +53,12 @@ public class FdrSvmTest implements MScanWorkerListener
 
             this.mConfig.setmBoostIter(3);                	//liczba iteracji wyznaczenia zbioru przykładów pozytywnych na podstawie nowego score
 			this.mConfig.setmOptimize(true);              	//optymalizacja parametrow modelu SVM
-            this.mConfig.setmOptimizeIter(1);             	//liczba iteracji optymalizacji (usrednienie wynikow)
+            this.mConfig.setmOptimizeIter(3);             	//liczba iteracji optymalizacji (usrednienie wynikow)
             this.mConfig.setmCVFolds(3);                  	//liczba zbiorow walidacyjnych przy optymalizacji (jeśli 1 -> mOptimizeIter=1)
-            this.mConfig.setmKernel(svm_parameter.RBF);     //typ jadra SVM
+            this.mConfig.setmKernel(svm_parameter.LINEAR);  //typ jadra SVM
 
-			this.mConfig.setmC(new double[]{0.1, 1, 10});
-			this.mConfig.setmCneg_pos(new double[]{1, 3, 10});
+//			this.mConfig.setmC(new double[]{0.1, 1, 10});
+//			this.mConfig.setmCneg_pos(new double[]{1, 3, 10});
 
 			this.mConfig.getmScoreConfig().getFragmentationConfig().setInstrument(this.mSample.getHeader().getInstrument());
 			this.mConfig.getmScoreConfig().setFragmentMMD(this.mSample.getHeader().getFragmentMMD());
@@ -281,8 +281,8 @@ public class FdrSvmTest implements MScanWorkerListener
 		if (args!=null && args.length>0)
 			new FdrSvmTest(args[0]);
         else
-            //new FdrSvmTest(".//data//70630_grzy_H_HAX_1.dat");	//z enzymem (semitypsyna)
+            new FdrSvmTest(".//data//HAX_3.dat");					//z enzymem (semitypsyna)
             //new FdrSvmTest(".//data//CA_A.dat");					//z enzymem (semitypsyna)
-            new FdrSvmTest(".//data//peptytdy_CA_A.dat");			//bez eznymu
+            //new FdrSvmTest(".//data//peptytdy_CA_A.dat");			//bez eznymu
     }
 }

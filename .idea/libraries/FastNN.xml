@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="FastNN">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/FastNN.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

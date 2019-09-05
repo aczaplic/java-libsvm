@@ -80,23 +80,44 @@ public class DatasetTools {
 
     /**
      * Saves data to file. One line is for one instance in data set. If features names have been defined in Dataset
-     * class object than the first line is for this names.
+     * class object then the first line is for this names.
      *
      * @param filename
      *              path to output file
      * @param dataset
      *              data set to be saved
      */
-    public static void saveData(String filename, BasicDataset dataset) throws FileNotFoundException {
+    public static void saveData(String filename, Dataset dataset) throws FileNotFoundException {
+        ArrayList<String> featuresNames = new ArrayList<>();
+        if (dataset instanceof BasicDataset)
+            if (((BasicDataset) dataset).getFeaturesNames().size() > 0)
+                featuresNames = ((BasicDataset) dataset).getFeaturesNames();
+        saveData(filename, dataset, featuresNames);
+    }
+
+    /**
+     * Saves data to file. One line is for one instance in data set. If features names have been provided to method
+     * then the first line is for this names.
+     *
+     * @param filename
+     *              path to output file
+     * @param dataset
+     *              data set to be saved
+     * @param featuresNames
+     *              a list of the features names
+     */
+    public static void saveData(String filename, Dataset dataset, ArrayList<String> featuresNames) throws FileNotFoundException {
         PrintStream consoleStream = System.out;
         PrintStream fileStream = new PrintStream(new File(filename));
         System.setOut(fileStream);
-        if (dataset.getFeaturesNames().size() > 0)
+
+        if (featuresNames.size() > 0)
         {
             StringBuilder str = new StringBuilder("sequence\tpos_neg");
-            for (String feature: dataset.getFeaturesNames()) str.append("\t").append(feature);
+            for (String feature : featuresNames) str.append("\t").append(feature);
             System.out.println(str);
         }
+
         for (int ind = 0; ind < dataset.size(); ind++)
         {
             BasicInstance instance = (BasicInstance) dataset.getInstance(ind);

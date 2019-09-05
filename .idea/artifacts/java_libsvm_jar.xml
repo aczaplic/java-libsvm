@@ -1,0 +1,16 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="java-libsvm:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/java_libsvm_jar</output-path>
+    <root id="archive" name="java-libsvm.jar">
+      <element id="module-output" name="java-libsvm" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libsvm-3.23/libsvm.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/combinatoricslib-2.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/libsvm.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/macify.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/mscanlib.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/mscanlib-plots.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/commons-lang3-3.9.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/FastNN.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
