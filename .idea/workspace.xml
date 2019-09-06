@@ -7,59 +7,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8881096b-6581-48bd-a064-4b43a24fa8bf" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/artifacts/java_libsvm_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/FastNN.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/libsvm.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/CA_A_fdr.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/HAX_1_fdr.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/HAX_2_fdr.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/HAX_3_fdr.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/artifacts/java_libsvm_jar/java-libsvm.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/java-libsvm/META-INF/MANIFEST.MF" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Mascot_q-values.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/7bialek.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/for_develop/7bialek.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/7bialek_0.2_1_score.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/for_develop/7bialek_0.2_1_score.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/7bialek_0.2_1_score_mmt.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/for_develop/7bialek_0.2_1_score_mmt.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/K_0_4_F060457.dat" beforeDir="false" afterPath="$PROJECT_DIR$/data/for_develop/K_0_4_F060457.dat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/K_0_4_F060457_fdr.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/for_develop/K_0_4_F060457_fdr.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/full_data_&quot; + this.mConfig.getmQValueThreshold() + &quot;.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/peptytdy_CA_A_fdr.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/peptytdy_CA_A_fdr.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/promotoryK.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/for_develop/promotoryK.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/tab.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/for_develop/tab.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/test_data.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/train_data_0.2_iter_1.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/train_data_0.2_iter_2.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/train_data_0.2_iter_3.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/java-libsvm.iml" beforeDir="false" afterPath="$PROJECT_DIR$/java-libsvm.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/java_SVM.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/libsvm_proteins.m" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/java-libsvm/FdrSvmTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/java-libsvm/FdrSvmTest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/java-libsvm/FdrSvmWorker.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/java-libsvm/FdrSvmWorker.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/java-libsvm/MainClass.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/java-libsvm/classification/SVMClassifier.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/java-libsvm/classification/SVMClassifier.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/java-libsvm/dataset/BasicDataset.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/java-libsvm/dataset/BasicDataset.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/java-libsvm/dataset/Dataset.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/java-libsvm/dataset/Dataset.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/java-libsvm/dataset/DatasetTools.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/java-libsvm/dataset/DatasetTools.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/java-libsvm/dataset/Fold.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/java-libsvm/dataset/Fold.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/test_model.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/test_transformation.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/FdrSvmTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FdrSvmTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/FdrSvmWorker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FdrSvmWorker.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/MainClass.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/classification/ClassificationResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/classification/ClassificationResult.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/classification/CrossValidation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/classification/CrossValidation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/classification/DatasetResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/classification/DatasetResult.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/classification/SVMClassifier.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/classification/SVMClassifier.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dataset/BasicDataset.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dataset/BasicDataset.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dataset/Dataset.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dataset/Dataset.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dataset/DatasetTools.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dataset/DatasetTools.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dataset/Fold.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/dataset/Fold.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -71,11 +23,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="FdrSvmTest.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="FdrSvmTest.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/FdrSvmTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1658">
-              <caret line="114" column="34" selection-start-line="114" selection-start-column="34" selection-end-line="114" selection-end-column="34" />
+            <state relative-caret-position="226">
+              <caret line="55" column="43" selection-start-line="55" selection-start-column="43" selection-end-line="55" selection-end-column="43" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -86,17 +38,17 @@
       <file leaf-file-name="FDRTools.class" pinned="false" current-in-tab="false">
         <entry file="jar://$PROJECT_DIR$/libs/mscanlib.jar!/mscanlib/ms/fdr/FDRTools.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="111">
-              <caret line="649" column="23" selection-start-line="649" selection-start-column="23" selection-end-line="649" selection-end-column="23" />
+            <state relative-caret-position="39">
+              <caret line="39" column="42" selection-start-line="39" selection-start-column="42" selection-end-line="39" selection-end-column="42" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FdrSvmWorker.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="FdrSvmWorker.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/FdrSvmWorker.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="188">
-              <caret line="314" column="57" lean-forward="true" selection-start-line="314" selection-start-column="57" selection-end-line="314" selection-end-column="57" />
+            <state relative-caret-position="221">
+              <caret line="186" column="52" selection-start-line="186" selection-start-column="52" selection-end-line="186" selection-end-column="52" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -107,8 +59,8 @@
       <file leaf-file-name="FdrSvmConfig.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/FdrSvmConfig.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="78">
-              <caret line="6" column="41" selection-start-line="6" selection-start-column="41" selection-end-line="6" selection-end-column="41" />
+            <state relative-caret-position="338">
+              <caret line="28" column="44" selection-start-line="28" selection-start-column="44" selection-end-line="28" selection-end-column="44" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#2662#2663#0" expanded="true" />
@@ -121,8 +73,8 @@
       <file leaf-file-name="FDRConfig.class" pinned="false" current-in-tab="false">
         <entry file="jar://$PROJECT_DIR$/libs/mscanlib.jar!/mscanlib/ms/fdr/FDRConfig.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="169">
-              <caret line="16" column="29" selection-start-line="16" selection-start-column="29" selection-end-line="16" selection-end-column="29" />
+            <state relative-caret-position="78">
+              <caret line="9" column="13" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -130,7 +82,7 @@
       <file leaf-file-name="DatasetTools.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/dataset/DatasetTools.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1690">
+            <state relative-caret-position="1651">
               <caret line="130" column="34" selection-start-line="130" selection-start-column="34" selection-end-line="130" selection-end-column="34" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -209,8 +161,8 @@
         <option value="$PROJECT_DIR$/src/dataset/Dataset.java" />
         <option value="$PROJECT_DIR$/src/dataset/Fold.java" />
         <option value="$PROJECT_DIR$/src/classification/SVMClassifier.java" />
-        <option value="$PROJECT_DIR$/src/FdrSvmTest.java" />
         <option value="$PROJECT_DIR$/src/FdrSvmWorker.java" />
+        <option value="$PROJECT_DIR$/src/FdrSvmTest.java" />
       </list>
     </option>
   </component>
@@ -227,8 +179,8 @@
     </navigator>
     <panes>
       <pane id="Scope" />
-      <pane id="PackagesPane" />
       <pane id="AndroidView" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -374,13 +326,12 @@
       <window_info anchor="right" id="Capture Analysis" order="1" />
       <window_info anchor="bottom" id="Event Log" order="2" sideWeight="0.34506503" side_tool="true" weight="0.63349134" />
       <window_info anchor="right" id="Maven Projects" order="4" />
-      <window_info anchor="bottom" id="Run" order="5" sideWeight="0.65493494" weight="0.27172196" />
+      <window_info anchor="bottom" id="Run" order="5" sideWeight="0.65493494" weight="0.49605057" />
       <window_info anchor="bottom" id="Version Control" order="3" sideWeight="0.497318" weight="0.32755905" />
       <window_info anchor="bottom" id="Terminal" order="0" />
       <window_info id="Capture Tool" order="3" />
       <window_info id="Designer" order="1" />
-      <window_info content_ui="combo" id="Project" order="5" visible="true" weight="0.13389441" />
-      <window_info anchor="bottom" id="Find" order="4" sideWeight="0.49578544" weight="0.821485" />
+      <window_info content_ui="combo" id="Project" order="5" weight="0.13389441" />
       <window_info id="Structure" order="6" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="6" weight="0.25" />
       <window_info id="UI Designer" order="2" />
@@ -392,7 +343,36 @@
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="3" type="SLIDING" weight="0.4" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Cvs" order="7" weight="0.25" />
+      <window_info anchor="bottom" id="Find" order="4" sideWeight="0.49578544" weight="0.821485" />
     </layout>
+    <layout-to-restore>
+      <window_info anchor="right" id="Palette" order="0" />
+      <window_info anchor="bottom" id="Find" order="4" sideWeight="0.49578544" weight="0.821485" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="7" weight="0.25" />
+      <window_info anchor="right" id="Capture Analysis" order="1" />
+      <window_info active="true" anchor="bottom" id="Run" order="5" sideWeight="0.65493494" visible="true" weight="0.27172196" />
+      <window_info anchor="right" id="Ant Build" order="6" weight="0.25" />
+      <window_info anchor="bottom" id="Cvs" order="7" weight="0.25" />
+      <window_info content_ui="combo" id="Project" order="5" weight="0.13389441" />
+      <window_info id="Structure" order="6" side_tool="true" weight="0.25" />
+      <window_info anchor="right" id="Theme Preview" order="2" />
+      <window_info anchor="bottom" id="TODO" order="10" />
+      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info id="Image Layers" order="0" />
+      <window_info id="Designer" order="1" />
+      <window_info id="UI Designer" order="2" />
+      <window_info anchor="bottom" id="Debug" order="6" sideWeight="0.63908046" weight="0.22748815" />
+      <window_info anchor="right" id="Palette&#9;" order="5" />
+      <window_info anchor="bottom" id="Terminal" order="0" />
+      <window_info anchor="bottom" id="Event Log" order="2" sideWeight="0.34506503" side_tool="true" weight="0.63349134" />
+      <window_info anchor="bottom" id="Inspection" order="8" weight="0.4" />
+      <window_info anchor="bottom" id="Version Control" order="3" sideWeight="0.497318" weight="0.32755905" />
+      <window_info id="Capture Tool" order="3" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="3" type="SLIDING" weight="0.4" />
+      <window_info anchor="bottom" id="Messages" order="9" sideWeight="0.47203064" weight="0.47551343" />
+      <window_info anchor="right" id="Maven Projects" order="4" />
+      <window_info id="Favorites" order="4" side_tool="true" />
+    </layout-to-restore>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -779,7 +759,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/dataset/DatasetTools.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1690">
+        <state relative-caret-position="1651">
           <caret line="130" column="34" selection-start-line="130" selection-start-column="34" selection-end-line="130" selection-end-column="34" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -787,13 +767,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/MainClass.java">
+    <entry file="file://$PROJECT_DIR$/src/MainClass.java" />
+    <entry file="file://$PROJECT_DIR$/src/classification/SVMClassifier.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="21" column="90" selection-start-line="21" selection-start-column="90" selection-end-line="21" selection-end-column="90" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+        <state relative-caret-position="195">
+          <caret line="68" selection-start-line="68" selection-end-line="68" />
         </state>
       </provider>
     </entry>
@@ -804,17 +782,34 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar://$PROJECT_DIR$/libs/mscanlib.jar!/mscanlib/ms/fdr/FDRTools.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="39">
+          <caret line="39" column="42" selection-start-line="39" selection-start-column="42" selection-end-line="39" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/FdrSvmWorker.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="186" column="52" selection-start-line="186" selection-start-column="52" selection-end-line="186" selection-end-column="52" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="jar://$PROJECT_DIR$/libs/mscanlib.jar!/mscanlib/ms/fdr/FDRConfig.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="169">
-          <caret line="16" column="29" selection-start-line="16" selection-start-column="29" selection-end-line="16" selection-end-column="29" />
+        <state relative-caret-position="78">
+          <caret line="9" column="13" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/FdrSvmConfig.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="78">
-          <caret line="6" column="41" selection-start-line="6" selection-start-column="41" selection-end-line="6" selection-end-column="41" />
+        <state relative-caret-position="338">
+          <caret line="28" column="44" selection-start-line="28" selection-start-column="44" selection-end-line="28" selection-end-column="44" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#2662#2663#0" expanded="true" />
@@ -823,37 +818,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/classification/SVMClassifier.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="68" selection-start-line="68" selection-end-line="68" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/libs/mscanlib.jar!/mscanlib/ms/fdr/FDRTools.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="111">
-          <caret line="649" column="23" selection-start-line="649" selection-start-column="23" selection-end-line="649" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/FdrSvmTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1658">
-          <caret line="114" column="34" selection-start-line="114" selection-start-column="34" selection-end-line="114" selection-end-column="34" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/FdrSvmWorker.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="188">
-          <caret line="314" column="57" lean-forward="true" selection-start-line="314" selection-start-column="57" selection-end-line="314" selection-end-column="57" />
+        <state relative-caret-position="226">
+          <caret line="55" column="43" selection-start-line="55" selection-start-column="43" selection-end-line="55" selection-end-column="43" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

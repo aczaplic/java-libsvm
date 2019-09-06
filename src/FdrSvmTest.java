@@ -108,7 +108,7 @@ public class FdrSvmTest implements MScanWorkerListener
 			if (query!=null)
 			{
 				//dla kazdego przypisania z danego zapytania
-				for (MsMsAssignment assignment:query.getAssignmentsList())
+				for (MsMsAssignment assignment: query.getAssignmentsList())
 				{
 					StringBuilder str=new StringBuilder();
 					
@@ -148,43 +148,28 @@ public class FdrSvmTest implements MScanWorkerListener
 					str.append("\t");
 					if (!assignment.isNA())
 					{
-						str.append(assignment.getScore());		//score
+						str.append(assignment.getScore());        //score
 						str.append("\t");
-						str.append(assignment.getScoreDelta());	//score delta
-						str.append("\t");						
-						str.append(query.getMIT());				//MIT
-						str.append("\t");			
-						str.append(query.getMHT());				//MHT
+						str.append(assignment.getScoreDelta());    //score delta
 						str.append("\t");
-						str.append(assignment.getEValue());		//e-wartosc
+						str.append(query.getMIT());                //MIT
 						str.append("\t");
-						str.append(assignment.getQValue());		//q-wartosc
-						
-						//zliczanie przypisan o q-wartosci <= od progu
-                        if (assignment.getDecoy()==FDRTools.IS_TARGET) {
-                            if (assignment.getQValue() <= this.mConfig.getmQValueThreshold())
-                                qPos++;
-                            for (int n = thresholds.length - 1; n >= 0; n--) {
-                                if (assignment.getQValue() < thresholds[n])
-                                    nrPositive[n]++;
-                                else break;
-                            }
-                        }
-
+						str.append(query.getMHT());                //MHT
+						str.append("\t");
+						str.append(assignment.getEValue());        //e-wartosc
+						str.append("\t");
+						str.append(assignment.getQValue());        //q-wartosc
 					}
 					else
 						str.append("-\t-\t-\t-\t-\t-");
-					
+
 					System.out.println(str);
 				}
 			}
 		}
 		System.setOut(consoleStream);
 		
-		System.out.println("\nAFTER POST-PROCESSING\nQueries with q-values <");
-		System.out.println(this.mConfig.getmQValueThreshold() + "(user defined threshold): " + qPos);
-        for (int n=0; n<thresholds.length; n++)
-            System.out.println(thresholds[n] + ": " + nrPositive[n]);
+
 		System.out.println("Done");
 	}
 

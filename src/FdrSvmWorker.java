@@ -151,7 +151,7 @@ public final class FdrSvmWorker extends MScanWorker
                         {
                             if (assignment.getDecoy() == FDRTools.IS_TARGET)
                             {
-                                if (assignment.getQValue() < this.mConfig.getmQValueThreshold())
+                                if (assignment.getQValue() <= this.mConfig.getmQValueThreshold())
                                     qPos++;
                                 for (int n = thresholds.length - 1; n >= 0; n--)
                                 {
@@ -169,11 +169,41 @@ public final class FdrSvmWorker extends MScanWorker
                 System.out.println(this.mConfig.getmQValueThreshold() + "(user defined threshold): " + qPos);
                 for (int n = 0; n < thresholds.length; n++)
                     System.out.println(thresholds[n] + ": " + nrPositive[n]);
-			
+
 				//liczenie nowych q-wartosci z uzyciem SVM
 				if (this.mConfig.ismComputeSVM())
 				{
 					this.selfBoostingSVM(sample, queries);
+
+                    qPos=0;
+                    nrPositive = new int[thresholds.length];
+                    for (MsMsQuery query: queries)
+                    {
+                        if (query != null)
+                        {
+                            //dla kazdego przypisania z danego zapytania
+                            for (MsMsAssignment assignment : query.getAssignmentsList())
+                            {
+                                if (assignment.getDecoy() == FDRTools.IS_TARGET)
+                                {
+                                    if (assignment.getQValue() <= this.mConfig.getmQValueThreshold())
+                                        qPos++;
+                                    for (int n = thresholds.length - 1; n >= 0; n--)
+                                    {
+                                        if (assignment.getQValue() < thresholds[n])
+                                            nrPositive[n]++;
+                                        else break;
+                                    }
+                                }
+
+                            }
+                        }
+                    }
+
+                    System.out.println("\nAFTER POST-PROCESSING\nQueries with q-values <");
+                    System.out.println(this.mConfig.getmQValueThreshold() + "(user defined threshold): " + qPos);
+                    for (int n=0; n<thresholds.length; n++)
+                        System.out.println(thresholds[n] + ": " + nrPositive[n]);
 				}
 			}
 		}
